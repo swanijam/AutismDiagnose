@@ -1,0 +1,95 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.webviewapp.MainActivity"
+    tools:ignore="MergeRootFrame" >
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30px"
+        style="@style/AppTheme"
+        android:text="Autism DA"
+        android:layout_gravity="top|center"
+        android:textColor="#000000"
+        android:alpha=".7"
+        android:textSize="60dp" />
+
+    <TextView
+        android:id="@+id/description"
+        android:layout_width="wrap_content"
+        android:textSize="20sp"
+        android:layout_weight="1"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:alpha=".8"
+        android:layout_height="wrap_content"
+        android:text="An Autism Diagnostic Application using name recognition" />
+
+    <FrameLayout
+	    android:id="@+id/back"
+	    android:orientation="vertical"
+	    android:visibility="invisible"
+	    android:layout_gravity="bottom|center"
+	    android:layout_width="match_parent"
+	    android:layout_height="80dp"
+	    tools:context="com.example.webviewapp.MainActivity"
+	    tools:ignore="MergeRootFrame" >
+	    	<Button
+		    android:id="@+id/backButton"
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+		    android:layout_gravity="right|center_vertical"
+		    android:background="@drawable/apptheme_btn_default_green"
+		    android:gravity="right|center_vertical"
+		    android:scaleType="fitCenter"
+		    android:text="Back To Trials"
+		    android:textColor="#FFFFFF"
+		    android:textSize="40dp" />
+		
+		<ImageView
+		    android:id="@+id/imageView1"
+		    android:layout_width="50dp"
+		    android:layout_height="80dp"
+		    android:layout_marginTop="32dp"
+		    android:layout_gravity="bottom|left"
+		    android:src="@drawable/leftarrow" />
+		</FrameLayout>
+		
+    
+      <FrameLayout
+	    android:id="@+id/tutorial"
+	    android:orientation="vertical"
+	    android:layout_marginTop="5dp"
+	    android:layout_gravity="bottom|center"
+	    android:layout_width="match_parent"
+	    android:layout_height="80dp"
+	    tools:context="com.example.webviewapp.MainActivity"
+	    tools:ignore="MergeRootFrame" >
+	    	
+		<Button
+		    android:id="@+id/tutButton"
+		    android:layout_width="match_parent"
+		    android:layout_height="80dp"
+		    android:gravity="left|center_vertical"
+		    android:background="@drawable/apptheme_btn_default_holo_light"
+		    android:textColor="#FFFFFF"
+		    android:scaleType="fitCenter"
+		    android:text="Start Tutorial"
+		    android:textSize="40dp" />
+
+		<ImageView
+		    android:id="@+id/imageView1"
+		    android:layout_width="50dp"
+		    android:layout_height="80dp"
+		    android:layout_marginTop="32dp"
+		    android:layout_gravity="bottom|right"
+		    android:src="@drawable/rightarrow" />
+		
+	</FrameLayout>
+    
+</LinearLayout>
