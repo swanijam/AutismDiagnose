@@ -2,7 +2,9 @@ package com.example.autismdiagnose;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -16,36 +18,39 @@ public class MainScreen extends Activity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_main_screen);
+		
 		Bundle bundle = getIntent().getExtras();
+		SharedPreferences prefs = this.getSharedPreferences(
+								  "com.example.autismdiagnose", 
+								  Context.MODE_PRIVATE);
+		
+		boolean completedTutorial = prefs.getBoolean("COMPLETED", false);
+		
+		Button tutorial = (Button) findViewById(R.id.tutButton);
+		tutorial.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				switchToTutorials();
+			}
+		});
 		
 		// If we are starting on this activity
-		if (bundle == null) {
+		if (completedTutorial == true) {
 			switchToVideoAndDestroy();
 		}
-		else if (bundle.getBoolean("HELP") == true) {
-			View back = (View) findViewById(R.id.back);
-			back.setVisibility(View.VISIBLE);
-			
-			Button backbtn = (Button) findViewById(R.id.backButton);
-				backbtn.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View arg0) {
-						// TODO Auto-generated method stub
-						switchToVideoAndDestroy();
-					}
-				});
-			
-			Button tutorial = (Button) findViewById(R.id.tutButton);
-				tutorial.setOnClickListener(new OnClickListener() {
-					
-					@Override
-					public void onClick(View v) {
-						// TODO Auto-generated method stub
-						switchToTutorials();
-					}
-				});
+		
+		boolean SWITCHED_FROM_HELP;
+		if (bundle == null) {
+			SWITCHED_FROM_HELP = false;
+		}
+		else {
+			SWITCHED_FROM_HELP = bundle.getBoolean("HELP");
 		}
 		
+		if (SWITCHED_FROM_HELP == true) {
+			switchToTutorials();
+		}
 	}
 
 	public void switchToVideoAndDestroy() {

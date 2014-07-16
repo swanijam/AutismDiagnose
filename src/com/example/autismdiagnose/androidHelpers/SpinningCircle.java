@@ -21,19 +21,14 @@ public class SpinningCircle extends View {
 	protected void onDraw(Canvas canvas){
 		super.onDraw(canvas);
 		
-		//Log.v("ArcWid", String.valueOf(arcwidth));
+		Paint FillColor = new Paint();
+		FillColor.setColor(Color.parseColor("#00FF66"));		
+		FillColor.setStyle(Paint.Style.STROKE);
+		FillColor.setStrokeWidth(8);
+	
+		canvas.drawArc(new RectF(10, 10, canvas.getWidth()-10, canvas.getHeight()-10), 270, -arcwidth, false, FillColor);
 		
-		Paint red = new Paint();
-		Paint heavyred = new Paint();
-		heavyred.setColor(Color.parseColor("#CC0099"));
-		red.setColor(Color.parseColor("#FF0099"));
 		
-		red.setStyle(Paint.Style.STROKE);
-		heavyred.setStyle(Paint.Style.STROKE);
-		heavyred.setStrokeWidth(5);
-		red.setStrokeWidth(20);
-		
-		canvas.drawArc(new RectF(15, 15, canvas.getWidth()-16, canvas.getHeight()-16), 270, arcwidth, false, red);		
-		arcwidth -= 1.15;
+		arcwidth -= 1.16;
 	}
 }

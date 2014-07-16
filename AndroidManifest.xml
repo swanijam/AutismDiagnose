@@ -22,11 +22,6 @@
         <activity
             android:name="com.example.autismdiagnose.MainScreen"
             android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name="com.example.autismdiagnose.VideoUI"
@@ -38,15 +33,24 @@
             android:parentActivityName="com.example.autismdiagnose.Tutorial" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.autismdiagnose.MainScreen" />
+                android:value="com.example.autismdiagnose.Tutorial" />
         </activity>
         <activity
             android:name="com.example.autismdiagnose.Tutorial"
             android:label="@string/title_activity_tutorial"
-            android:parentActivityName="com.example.autismdiagnose.MainScreen" >
+            android:parentActivityName="com.example.autismdiagnose.VideoUI" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.autismdiagnose.MainScreen" />
+                android:value="com.example.autismdiagnose.VideoUI" />
+        </activity>
+        <activity
+            android:name="com.example.autismdiagnose.DemoActivity"
+            android:label="@string/title_activity_demo" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

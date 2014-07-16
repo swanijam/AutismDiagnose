@@ -1,9 +1,8 @@
 package com.example.autismdiagnose;
 
-import java.io.File;
 import java.io.IOException;
-
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -14,22 +13,21 @@ import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnErrorListener;
 import android.media.MediaRecorder.OnInfoListener;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.example.autismdiagnose.R;
 import com.example.autismdiagnose.androidHelpers.AndroidPreviewRecorder;
+import com.example.autismdiagnose.androidHelpers.FileProcessor;
 import com.example.autismdiagnose.androidHelpers.Response;
 import com.example.autismdiagnose.androidHelpers.SpinningCircle;
+import com.example.autismdiagnose.androidHelpers.TimerController;
 
 /**
  * @author Sheik Hassan
@@ -60,12 +58,12 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	
 	// Animation that shows how much time is remaining before the next notify message
 	private SpinningCircle spinningcircle;
-	private static CountDownTimer timer;
+	private static TimerController TimerController;
 	
 	private AndroidPreviewRecorder previewRecorder;
 	
 	// Response to ask the user if the child responded (Yes, No)
-	private Builder response;
+	private Builder responseBuilder;
 		
 	private static final int RECORDINGLIMIT = 5000;
 	
@@ -87,6 +85,8 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		// Retrieve UI elements
 		notify = (TextView) findViewById(R.id.notify);
 		disableMessage = (TextView) findViewById(R.id.disableMessage);
+		TextView restart = (TextView) findViewById(R.id.restartMessage);
+		
 		help = (Button) findViewById(R.id.help);
 		start = (Button) findViewById(R.id.startTrial);
 		videoView = (VideoView) findViewById(R.id.videoView1);
@@ -96,11 +96,36 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
  		holder.addCallback(this);
  		previewRecorder = new AndroidPreviewRecorder(cam, recorder);
  		
- 		response = new Builder(this);
- 		setDialogListeners();
+ 		// Slide prompt to timer
+ 		// Say your child's name and wait *timer
+ 		// other idea --> say name ---> wait
+ 		// Loading indicator with "wait" in the middle
+ 		// *Discard*
+ 		// *No response*
+ 		// After 7 seconds try again?
+ 		// TIMER CLOCKWISE
+ 		
+ 		responseBuilder = new Builder(this);
  		spinningcircle = (SpinningCircle) findViewById(R.id.spinningcircle);
+ 		
+ 		
+ 		// Initialize the Timer that will control the various
+ 		// of the trial process.
+ 		TimerController = new TimerController(
+ 						   getApplicationContext(), 
+ 						   spinningcircle, 
+ 						   RECORDINGLIMIT, start);
+ 		
+ 		TimerController.setTextView("notify", notify);
+ 		TimerController.setTextView("disableMessage", disableMessage);
+ 		TimerController.setTextView("restart", restart);
+ 		
+ 		AlertDialog response = setResponseDialogListener();
+ 		AlertDialog waitout = setWaitOutDialogListener();
+ 		TimerController.setDialog("response", response);
+ 		TimerController.setDialog("waitout", waitout);
  	}
-	
+
 	public void onClick(View view) {
 		
 		if(view.getId() == start.getId())
@@ -115,7 +140,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	public void start() {
 		start.setVisibility(View.GONE);
 		help.setVisibility(View.GONE);
-	
+		
 		TRIAL_NUMBER = 0;
 		
 		// Start a new recording session
@@ -127,67 +152,20 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 							   MediaRecorder.AudioSource.DEFAULT, 
 							   MediaRecorder.VideoSource.CAMERA, 
 							   CamcorderProfile.QUALITY_LOW);
-		startTimer();
+		
+		TimerController.startCountDownResponseTimer(TRIAL_NUMBER);		
 		spinningcircle.setVisibility(View.VISIBLE);
 	}
 	
 	public void stop() {
 		previewRecorder.stopRecorder();
-		timer.cancel();
+		TimerController.stopTimer();
 		
 		start.setVisibility(View.VISIBLE);
 		help.setVisibility(View.VISIBLE);
 		spinningcircle.setVisibility(View.GONE);
 	}
-	
-	/** 
-	 * Starts the timer that shows a prompt.
-	 * When the user clicks 'Start Trial', every 5 seconds,
-	 * they are prompted to enter if the child responded or not.
-	*/
-	
-	public boolean startTimer() {
-		
-		if (TRIAL_NUMBER == 3) {
-			return false;
-		}
-		
-		// Start a new timer everytime this method is called.
-		if (timer != null) {
-			Log.v("canceled Timer", "true");
-			timer.cancel();
-		}
-		
-		// Animate "Please say your child's name" to visible
-		notify.setVisibility(View.VISIBLE);
-		Animation FadeIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_in);
-		notify.startAnimation(FadeIn);
-		
-		timer = new CountDownTimer(RECORDINGLIMIT, 1) {
-			@Override
-			public void onTick(long mills) {
-				spinningcircle.invalidate();
-			}
-			@Override
-			public void onFinish() {
-				try {
-					Animation FadeOut = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_out);
-					notify.startAnimation(FadeOut);
-					notify.setVisibility(View.INVISIBLE);
-					
-					// Show prompt and reset the spinning circle animation
-					response.show();
-					spinningcircle.arcwidth = 360;
-					spinningcircle.setVisibility(View.INVISIBLE);
-				}
-				catch(Exception e) {}
-			}
-		}.start();
-		
-		return true;
-	}
-	
-	
+
 	/**
 	 * This method sets the camera preview on the surface holder
 	 */
@@ -206,12 +184,6 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	}
 
 	@Override
-	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
-
-	@Override
-	public void surfaceDestroyed(SurfaceHolder holder) {}
-
-	@Override
 	public void onPause() {
 		super.onPause();
 		notify.setVisibility(View.GONE);
@@ -222,10 +194,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		}
 		else previewRecorder.releaseRecorder();
 		
-		try {
-			File f = new File(getFilesDir() + "/trials0.mp4");
-			f.delete();
-		}catch(Exception e){}
+		FileProcessor.DeleteFile(getFilesDir() + "/trials0.mp4");
 		
 	}
 	
@@ -247,7 +216,11 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	public void onInfo(MediaRecorder mr, int what, int extra) {
 		// TODO Auto-generated method stub
 		if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
-			previewRecorder.stopRecorder();
+			stop();
+			FileProcessor.DeleteFile(getFilesDir() + "/trials0.mp4");
+			videoData = new Response(null);
+			videoData.setNoResponse(true);
+			previewRecorder.addVideoData(videoData);
 		}		
 		Log.v(CLASSTAG, "recording!!");
 	}
@@ -261,7 +234,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	 * RESTART ---> Stops the recording and discards the current trial.
 	 * NO ---> Continues with a new trial.
 	 */
-	public void setDialogListeners() {
+	private AlertDialog setResponseDialogListener() {
 		DialogInterface.OnClickListener responseListener = new DialogInterface.OnClickListener() {
 			
 			@Override
@@ -269,21 +242,23 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 				// TODO Auto-generated method stub
 				if (which == Dialog.BUTTON_POSITIVE) {
 					stop();
-					timer.cancel();
+					TimerController.stopTimer();
 					TRIAL_NUMBER += 1;
 					previewRecorder.addVideoData(videoData);
-					showDelay();
+					TimerController.showDelayAfterFinishTimer();
 				}
 				else if (which == Dialog.BUTTON_NEGATIVE) {
 					if (TRIAL_NUMBER < 3){
 						spinningcircle.setVisibility(View.VISIBLE);
 						TRIAL_NUMBER += 1;
-						startTimer();
+						TimerController.startCountDownResponseTimer(TRIAL_NUMBER);
 					}
 				}
 				else if(which == Dialog.BUTTON_NEUTRAL) {
 					stop();
-					timer.cancel();
+					TimerController.stopTimer();
+					TimerController.showRestartMessage();
+					Log.v("NU", "NUTREAL");
 				}
 				
 				if (TRIAL_NUMBER == 1) {
@@ -297,7 +272,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 					videoData.setTrial_3_time();
 					previewRecorder.addVideoData(videoData);
 					stop();
-					showDelay();
+					TimerController.showDelayAfterFinishTimer();
 				}
 				
 				Log.v("Click", Integer.toString(which));
@@ -305,40 +280,25 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		};
 		
 		// Show the dialog and determine if there was a response
-		response.setMessage("Was there a response?").setPositiveButton("Yes", responseListener);
-		response.setNegativeButton("No", responseListener);
-		response.setNeutralButton("Restart", responseListener);
+		responseBuilder.setMessage("\tWas there a response? \n\t(answer within 5 seconds)")
+		.setPositiveButton("Yes", responseListener);
+		responseBuilder.setNegativeButton("No", responseListener);
+		responseBuilder.setNeutralButton("Discard", responseListener);
 		
+		return responseBuilder.create();
 	}
 	
-	/**
-	 * Method to disable the 'Start Trial' Button for 10 seconds after
-	 * has successfully completed the trial. 
-	 */
-	public void showDelay() {
-		start.setEnabled(false);
-		disableMessage.setVisibility(View.VISIBLE);
-		Animation FadeIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_in);
-		disableMessage.startAnimation(FadeIn);
-		
-		if (timer != null) {
-			timer.cancel();
-		}
-		
-		timer = new CountDownTimer(10000, 1000) {
-			@Override
-			public void onTick(long mills) {
-			}
-			
-			@Override
-			public void onFinish() {
-				start.setEnabled(true);
-				
-				Animation FadeOut = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_out);
-				disableMessage.startAnimation(FadeOut);
-				disableMessage.setVisibility(View.GONE);
-			}
-		}.start();
-	}// end showDelay
+	private AlertDialog setWaitOutDialogListener() {
+		responseBuilder = new Builder(this);
+		responseBuilder.setMessage("We're Sorry! You did not respond so we discarded your trial!")
+		.setPositiveButton("Ok! Let's Retry", null);
+		return responseBuilder.create();
+	}
+
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
+
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) {}
 }
 

@@ -86,4 +86,11 @@ public class FileProcessor {
 		return temp;
 	}
 
+	public static void DeleteFile(String name) {
+		try {
+			File f = new File(name);
+			f.delete();
+		}catch(Exception e){}
+	}
+	
 }

@@ -7,5 +7,6 @@
     <string name="title_activity_video_ui">VideoUI</string>
     <string name="title_activity_tutorials">Tutorials</string>
     <string name="title_activity_tutorial">Tutorial</string>
+    <string name="title_activity_demo">DemoActivity</string>
 
 </resources>

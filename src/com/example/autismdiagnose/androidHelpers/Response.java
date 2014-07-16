@@ -6,6 +6,7 @@ import org.joda.time.DateTimeZone;
 public class Response {
 
 	private String path;
+	private boolean NO_RESPONSE = false;
 	private DateTime start_time;
 	private DateTime trial_1_time;
 	private DateTime trial_2_time;
@@ -38,6 +39,10 @@ public class Response {
 
 	public void setTrial_3_time() {
 		this.trial_3_time = getCurrentTime();
+	}
+
+	public void setNoResponse(boolean resp) {
+		this.NO_RESPONSE = resp;
 	}
 
 	public DateTime getStart_time() {

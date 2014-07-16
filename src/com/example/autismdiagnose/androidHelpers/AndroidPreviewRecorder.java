@@ -196,16 +196,10 @@ OnInfoListener, OnErrorListener {
 	
 
 	@Override
-	public void onError(MediaRecorder arg0, int arg1, int arg2) {
-		// TODO Auto-generated method stub
-		Log.v(CLASSTAG, "recording failed");
-	}
+	public void onError(MediaRecorder arg0, int what, int extras) {}
 
 	@Override
-	public void onInfo(MediaRecorder arg0, int arg1, int arg2) {
-		// TODO Auto-generated method stub
-		Log.v(CLASSTAG, "recording");
-	}
+	public void onInfo(MediaRecorder arg0, int what, int extra) {}
 
 	public Response getVideoData(int index) {
 		return VideoList.get(index);

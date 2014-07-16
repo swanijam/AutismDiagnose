@@ -10,12 +10,15 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 
 public class Tutorial extends Activity {
 
-	private String [] urls = {"https://www.youtube.com/watch?v=7JjiesNmADo", "https://www.youtube.com/watch?v=qctQR0tZtW0"};
+	private String [] urls = {"https://www.youtube.com/watch?v=7JjiesNmADo", 
+							  "https://www.youtube.com/watch?v=qctQR0tZtW0"};
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -36,9 +39,10 @@ public class Tutorial extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View view, int element,
 					long arg3) {
-				
-				 Log.v("Place", String.valueOf(element));
-				 switchToVideo(element);
+				 SharedPreferences prefs = getSharedPreferences("com.example.autismdiagnose", Context.MODE_PRIVATE);
+					prefs.edit().putBoolean("COMPLETED", true).commit();
+				 
+				switchToVideo(element);
 			}
 			
 		});		
@@ -69,4 +73,13 @@ public class Tutorial extends Activity {
 		
 		return isInstalled;
 	}
+	
+	@Override
+	public void onBackPressed() {
+		Log.v("Back send", "Here");
+		Intent videoUI = new Intent(this, VideoUI.class);
+		videoUI.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+		startActivity(videoUI);
+		finish();
+	}	
 }
