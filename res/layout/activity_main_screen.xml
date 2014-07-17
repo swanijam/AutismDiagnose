@@ -43,7 +43,7 @@
 		    android:layout_width="match_parent"
 		    android:layout_height="match_parent"
 		    android:layout_gravity="right|center_vertical"
-		    android:background="@drawable/apptheme_btn_default_green"
+		    android:background="@drawable/btn_default_green"
 		    android:gravity="right|center_vertical"
 		    android:scaleType="fitCenter"
 		    android:text="Back To Trials"
@@ -56,7 +56,7 @@
 		    android:layout_height="80dp"
 		    android:layout_marginTop="32dp"
 		    android:layout_gravity="bottom|left"
-		    android:src="@drawable/leftarrow" />
+		    android:src="@drawable/img_leftarrow_image" />
 		</FrameLayout>
 		
     
@@ -75,7 +75,7 @@
 		    android:layout_width="match_parent"
 		    android:layout_height="80dp"
 		    android:gravity="left|center_vertical"
-		    android:background="@drawable/apptheme_btn_default_green"
+		    android:background="@drawable/btn_default_green"
 		    android:textColor="#FFFFFF"
 		    android:scaleType="fitCenter"
 		    android:text="Start Tutorial"
@@ -87,7 +87,7 @@
 		    android:layout_height="80dp"
 		    android:layout_marginTop="32dp"
 		    android:layout_gravity="bottom|right"
-		    android:src="@drawable/rightarrow" />
+		    android:src="@drawable/img_rightarrow_image" />
 		
 	</FrameLayout>
     

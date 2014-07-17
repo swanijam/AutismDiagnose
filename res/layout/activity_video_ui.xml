@@ -18,18 +18,17 @@
 		    android:layout_height="match_parent"
 		    android:padding="10dp" />
 	</RelativeLayout>
+		
 		<TextView
-		    android:id="@+id/notify"
+		    android:id="@+id/startTrialMessage"
 		    android:layout_width="match_parent"
 		    android:layout_height="75dp"
-		    android:textSize="25dp"
+		    android:textSize="20dp"
 		    android:textColor="#FFFFFF"
-		    android:visibility="gone"
-		    android:layout_gravity="center|center_vertical"
-		    android:layout_marginBottom="70dp"
 		    android:background="@drawable/rounded_edges"
+		    android:layout_gravity="center|center_vertical"
 		    android:gravity="center|center_vertical"
-		    android:text="Say Your Child's Name Once" />
+		    android:text="Press 'Start Trial' to start recording" />
 		
 		<TextView
 		    android:id="@+id/disableMessage"
@@ -44,6 +43,18 @@
 		    android:text="Please wait 10 seconds before conducting another trial. Your current trial is being analyzed." />
 		
 		<TextView
+            android:id="@+id/notify"
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
+            android:textSize="20dp"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/rounded_edges"
+            android:visibility="gone"
+            android:layout_gravity="center|center_vertical"
+            android:gravity="center|center_vertical"
+            android:text="Say your child's name!" />
+		
+		<TextView
 		    android:id="@+id/restartMessage"
 		    android:layout_width="match_parent"
 		    android:layout_height="70dp"
@@ -55,7 +66,7 @@
 		    android:gravity="center|center_vertical"
 		    android:text="Your trial has been discarded. Please start again." />
 		
-		<com.example.autismdiagnose.androidHelpers.SpinningCircle
+		<com.example.autismdiagnose.android_helpers.SpinningCircle
 		    android:id="@+id/spinningcircle"
 		    android:layout_gravity="bottom|center"
 		    android:layout_height="60dp"
@@ -81,7 +92,7 @@
 		    android:layout_width="wrap_content"
 		    android:onClick="onClick"
 		    android:layout_height="50dp"
-		    android:background="@drawable/apptheme_btn_default_green"
+		    android:background="@drawable/btn_default_green"
 		    android:textColor="#FFFFFF"
 		    android:layout_gravity="right|top"
 		    android:text="Help" />
@@ -93,7 +104,7 @@
 		    android:textSize="40dp"
 		    android:onClick="onClick"
 		    android:scaleType="fitCenter"
-		    android:background="@drawable/apptheme_btn_default_holo_light"
+		    android:background="@drawable/btn_default_holo_light"
 		    android:text="Start Trial"
 		    android:textColor="#FFFFFF"
 		    android:layout_gravity="center|bottom"

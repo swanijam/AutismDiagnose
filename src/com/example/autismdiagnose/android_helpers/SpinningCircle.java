@@ -1,4 +1,4 @@
-package com.example.autismdiagnose.androidHelpers;
+package com.example.autismdiagnose.android_helpers;
 
 import android.content.Context;
 import android.graphics.Canvas;

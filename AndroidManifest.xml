@@ -22,7 +22,9 @@
         <activity
             android:name="com.example.autismdiagnose.app.MainScreen"
             android:label="@string/app_name" >
+       
         </activity>
+        
         <activity
             android:name="com.example.autismdiagnose.app.VideoUI"
             android:label="@string/title_activity_video_ui" >
@@ -46,11 +48,11 @@
         <activity
             android:name="com.example.autismdiagnose.app.DemoActivity"
             android:label="@string/title_activity_demo" >
-            <intent-filter>
+           <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            </intent-filter> 
         </activity>
     </application>
 

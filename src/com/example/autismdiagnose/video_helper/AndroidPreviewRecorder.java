@@ -1,8 +1,10 @@
-package com.example.autismdiagnose.androidHelpers;
+package com.example.autismdiagnose.video_helper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import com.example.autismdiagnose.android_helpers.FileProcessor;
 
 import android.app.Activity;
 import android.graphics.Color;

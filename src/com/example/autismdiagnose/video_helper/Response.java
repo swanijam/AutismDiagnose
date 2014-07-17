@@ -1,4 +1,4 @@
-package com.example.autismdiagnose.videoHelper;
+package com.example.autismdiagnose.video_helper;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;

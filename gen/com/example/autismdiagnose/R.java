@@ -92,38 +92,35 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int text_padding=0x7f050001;
     }
     public static final class drawable {
-        public static final int apptheme_btn_default_green=0x7f020000;
-        public static final int apptheme_btn_default_holo_light=0x7f020001;
-        public static final int back=0x7f020002;
-        public static final int btn_cling_normal=0x7f020003;
-        public static final int btn_cling_pressed=0x7f020004;
-        public static final int btn_green_normal=0x7f020005;
-        public static final int btn_green_pressed=0x7f020006;
+        public static final int back=0x7f020000;
+        public static final int btn_cling_normal=0x7f020001;
+        public static final int btn_cling_pressed=0x7f020002;
+        public static final int btn_default_green=0x7f020003;
+        public static final int btn_default_green_style_normal=0x7f020004;
+        public static final int btn_default_green_style_pressed=0x7f020005;
+        public static final int btn_default_holo_light=0x7f020006;
         public static final int btn_holo_light_disabled=0x7f020007;
         public static final int btn_holo_light_normal=0x7f020008;
         public static final int btn_holo_light_pressed=0x7f020009;
-        public static final int button=0x7f02000a;
-        public static final int button_normal=0x7f02000b;
-        public static final int button_shape=0x7f02000c;
+        public static final int btn_shape=0x7f02000a;
+        public static final int button=0x7f02000b;
+        public static final int button_normal=0x7f02000c;
         public static final int cling=0x7f02000d;
         public static final int cling_bleached=0x7f02000e;
         public static final int cling_button_bg=0x7f02000f;
-        public static final int green_button=0x7f020010;
+        public static final int dialog=0x7f020010;
         public static final int hand=0x7f020011;
         public static final int ic_launcher=0x7f020012;
-        public static final int leftarrow=0x7f020013;
-        public static final int light_green=0x7f020014;
-        public static final int list_view_back=0x7f020015;
-        public static final int list_view_back_pressed=0x7f020016;
-        public static final int list_view_item_btn=0x7f020017;
-        public static final int rightarrow=0x7f020018;
-        public static final int rounded_edges=0x7f020019;
-        public static final int thumb1=0x7f02001a;
-        public static final int tumb2=0x7f02001b;
+        public static final int img_leftarrow_image=0x7f020013;
+        public static final int img_response_image=0x7f020014;
+        public static final int img_rightarrow_image=0x7f020015;
+        public static final int rounded_edges=0x7f020016;
+        public static final int thumb1=0x7f020017;
+        public static final int tumb2=0x7f020018;
     }
     public static final class id {
         public static final int Tutorials=0x7f060012;
-        public static final int action_settings=0x7f060015;
+        public static final int action_settings=0x7f060017;
         public static final int back=0x7f06000d;
         public static final int backButton=0x7f06000e;
         public static final int container=0x7f060003;
@@ -132,17 +129,19 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
         public static final int help=0x7f060009;
         public static final int imageView1=0x7f06000f;
         public static final int notify=0x7f060005;
+        public static final int responseImage=0x7f060004;
         public static final int restartMessage=0x7f060007;
         public static final int showcase_button=0x7f060000;
         public static final int showcase_sub_text=0x7f060002;
         public static final int showcase_title_text=0x7f060001;
         public static final int spinningcircle=0x7f060008;
         public static final int startTrial=0x7f06000a;
+        public static final int startTrialMessage=0x7f060015;
         public static final int title=0x7f06000b;
         public static final int tutButton=0x7f060011;
         public static final int tutorial=0x7f060010;
-        public static final int videoView1=0x7f060004;
-        public static final int wait=0x7f060014;
+        public static final int videoView1=0x7f060014;
+        public static final int wait=0x7f060016;
         public static final int youtubeplayerview=0x7f060013;
     }
     public static final class layout {

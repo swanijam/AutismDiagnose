@@ -1,19 +1,17 @@
-package com.example.autismdiagnose.videoHelper;
+package com.example.autismdiagnose.video_helper;
 
 import java.util.HashMap;
 import com.example.autismdiagnose.R;
-import com.example.autismdiagnose.androidHelpers.PromptAnimations;
-import com.example.autismdiagnose.androidHelpers.SpinningCircle;
+import com.example.autismdiagnose.android_helpers.PromptAnimations;
+import com.example.autismdiagnose.android_helpers.SpinningCircle;
 
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
@@ -65,7 +63,8 @@ public class TimerController {
 			public void onTick(long arg0){}
 			@Override
 			public void onFinish() {
-				DIALOGS.get("response").getButton(DialogInterface.BUTTON_NEUTRAL).performClick();
+				DIALOGS.get("response").
+					getButton(DialogInterface.BUTTON_NEUTRAL).performClick();
 				DIALOGS.get("waitout").show();
 			}
 		};
@@ -79,13 +78,14 @@ public class TimerController {
 	
 	
 	/**
-	 * NOTE: You must set a 'response' dialog, and "notify" textView for this method to function.
+	 * NOTE: You must set a response dialog, and "notify" textView for this method to function.
 	 * 
 	 * @param trialNumber (NOTE: You must set a 'response' dialog for this method to function)
 	 * @return true if the timer was successfully started.
 	 */
 	public boolean startCountDownResponseTimer(int trialNumber) {
 		cancelDelayTimer();
+		hideAllTextView();
 
 		TRIAL_NUMBER = trialNumber;
 		if (TRIAL_NUMBER == 3) {
@@ -98,7 +98,7 @@ public class TimerController {
 			currentTimer.cancel();
 		}
 		
-		animateprompt.animateNotifyStart(TEXTVIEWS.get("notify"));
+		animateprompt.animateNotifyStart(TEXTVIEWS.get("notify"), true);
 		
 		currentTimer = new CountDownTimer(RECORDING_LIMIT, 1) {
 			@Override
@@ -108,7 +108,7 @@ public class TimerController {
 			@Override
 			public void onFinish() {
 				try {
-					animateprompt.dismissNotify(TEXTVIEWS.get("notify"));
+					animateprompt.dismissNotify(TEXTVIEWS.get("notify"), false);
 					
 					// Show prompt and reset the spinning circle animation
 					DIALOGS.get("response").show();
@@ -183,8 +183,10 @@ public class TimerController {
 	}
 	
 	public void hideAllTextView() {
+		TEXTVIEWS.get("startTrialMessage").setVisibility(View.GONE);
 		for (String view: TEXTVIEWS.keySet()) {
 			TEXTVIEWS.get(view).setVisibility(View.GONE);
+			Log.v("view", view);
 		}
 	}
 	

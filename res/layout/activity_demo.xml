@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:orientation="vertical"
-    android:background="#FFFFFF"
+    android:background="#000000"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.webviewapp.MainActivity"
@@ -11,11 +11,18 @@
 	<RelativeLayout
 	    android:layout_width="fill_parent"
 	    android:layout_height="fill_parent" >
-		<VideoView
-		    android:id="@+id/videoView1"
-		    android:layout_width="match_parent"
-		    android:layout_height="match_parent"
-		    android:padding="10dp" />
+		
+
+		<ImageView
+		    android:id="@+id/responseImage"
+		    android:layout_width="300dp"
+		    android:layout_height="100dp"
+		    android:layout_alignParentTop="true"
+		    android:layout_centerHorizontal="true"
+		    android:layout_marginTop="142dp"
+		    android:visibility="gone"
+		    android:src="@drawable/img_response_image" />
+
 	</RelativeLayout>
 	
 		<TextView
@@ -55,7 +62,7 @@
 		    android:gravity="center|center_vertical"
 		    android:text="Your trial has been discarded. Please start again." />
 		
-		<com.example.autismdiagnose.androidHelpers.SpinningCircle
+		<com.example.autismdiagnose.android_helpers.SpinningCircle
 		    android:id="@+id/spinningcircle"
 		    android:layout_gravity="bottom|center"
 		    android:layout_height="60dp"
@@ -69,7 +76,7 @@
 		    android:layout_width="wrap_content"
 		    android:onClick="onClick"
 		    android:layout_height="50dp"
-		    android:background="@drawable/apptheme_btn_default_green"
+		    android:background="@drawable/btn_default_green"
 		    android:textColor="#FFFFFF"
 		    android:layout_gravity="right|top"
 		    android:text="Help" />
@@ -81,7 +88,7 @@
 		    android:textSize="40dp"
 		    android:onClick="onClick"
 		    android:scaleType="fitCenter"
-		    android:background="@drawable/apptheme_btn_default_holo_light"
+		    android:background="@drawable/btn_default_holo_light"
 		    android:text="Start Trial"
 		    android:textColor="#FFFFFF"
 		    android:layout_gravity="center|bottom"

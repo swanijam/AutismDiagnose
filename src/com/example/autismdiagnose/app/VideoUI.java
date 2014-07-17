@@ -23,11 +23,11 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.example.autismdiagnose.R;
-import com.example.autismdiagnose.androidHelpers.FileProcessor;
-import com.example.autismdiagnose.androidHelpers.SpinningCircle;
-import com.example.autismdiagnose.videoHelper.AndroidPreviewRecorder;
-import com.example.autismdiagnose.videoHelper.Response;
-import com.example.autismdiagnose.videoHelper.TimerController;
+import com.example.autismdiagnose.android_helpers.FileProcessor;
+import com.example.autismdiagnose.android_helpers.SpinningCircle;
+import com.example.autismdiagnose.video_helper.AndroidPreviewRecorder;
+import com.example.autismdiagnose.video_helper.Response;
+import com.example.autismdiagnose.video_helper.TimerController;
 
 /**
  * @author Sheik Hassan
@@ -42,15 +42,13 @@ import com.example.autismdiagnose.videoHelper.TimerController;
 
 public class VideoUI extends Activity implements
 SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
-	
-	// "Please Say Your Child's Name" message
-	private TextView notify;
-	// Message displayed when "Start Trial" button is disabled
-	private TextView disableMessage;
+		
+		// "Please Say Your Child's Name" message
+	TextView notify;
 	
 	private Button help;
 	private Button start;
-
+	
 	private VideoView videoView;
 	private SurfaceHolder holder;
 	private Camera cam;
@@ -71,6 +69,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	// and 3 times to input if he/she responded or not. This variable is
 	// reset at the beginning of a new trial.
 	private static int TRIAL_NUMBER=0;
+	
 	// Stores start time and response time information as well as the
 	// location of the video file for each trial.
 	private static Response videoData;
@@ -81,57 +80,57 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_video_ui);
-     
+	 
 		// Retrieve UI elements
+		// "Please Say Your Child's Name" message
 		notify = (TextView) findViewById(R.id.notify);
-		disableMessage = (TextView) findViewById(R.id.disableMessage);
+		
+		// Help text for start trial button
+		TextView startTrialMessage = (TextView) findViewById(R.id.startTrialMessage);
+		startTrialMessage.setVisibility(View.VISIBLE);
+		
+		// Message displayed when "Start Trial" button is disabled
+		TextView disableMessage = (TextView) findViewById(R.id.disableMessage);
+		
 		TextView restart = (TextView) findViewById(R.id.restartMessage);
 		
 		help = (Button) findViewById(R.id.help);
 		start = (Button) findViewById(R.id.startTrial);
 		videoView = (VideoView) findViewById(R.id.videoView1);
- 		
+		
 		// Set up the videoView
 		holder = videoView.getHolder();
- 		holder.addCallback(this);
- 		previewRecorder = new AndroidPreviewRecorder(cam, recorder);
- 		
- 		// Slide prompt to timer
- 		// Say your child's name and wait *timer
- 		// other idea --> say name ---> wait
- 		// Loading indicator with "wait" in the middle
- 		// *Discard*
- 		// *No response*
- 		// After 7 seconds try again?
- 		// TIMER CLOCKWISE
- 		
- 		responseBuilder = new Builder(this);
- 		spinningcircle = (SpinningCircle) findViewById(R.id.spinningcircle);
- 		
- 		
- 		// Initialize the Timer that will control the various
- 		// of the trial process.
- 		TimerController = new TimerController(
- 						   getApplicationContext(), 
- 						   spinningcircle, 
- 						   RECORDINGLIMIT, start);
- 		
- 		TimerController.setTextView("notify", notify);
- 		TimerController.setTextView("disableMessage", disableMessage);
- 		TimerController.setTextView("restart", restart);
- 		
- 		AlertDialog response = setResponseDialogListener();
- 		AlertDialog waitout = setWaitOutDialogListener();
- 		TimerController.setDialog("response", response);
- 		TimerController.setDialog("waitout", waitout);
- 	}
-
+		holder.addCallback(this);
+		previewRecorder = new AndroidPreviewRecorder(cam, recorder);
+		
+		responseBuilder = new Builder(this);
+		spinningcircle = (SpinningCircle) findViewById(R.id.spinningcircle);
+		
+		
+		// Initialize the Timer that will control the various
+		// of the trial process.
+		TimerController = new TimerController(
+						   getApplicationContext(), 
+						   spinningcircle, 
+						   RECORDINGLIMIT, start);
+		
+		TimerController.setTextView("notify", notify);
+		TimerController.setTextView("startTrialMessage", startTrialMessage);
+		TimerController.setTextView("disableMessage", disableMessage);
+		TimerController.setTextView("restart", restart);
+		
+		AlertDialog response = setResponseDialogListener();
+		AlertDialog waitout = setWaitOutDialogListener();
+		TimerController.setDialog("response", response);
+		TimerController.setDialog("waitout", waitout);
+	}
+	
 	public void onClick(View view) {
 		
 		if(view.getId() == start.getId())
 			start();
 		else if (view.getId() == help.getId()) {
-			Intent tutscreen = new Intent(this, MainScreen.class);
+			Intent tutscreen = new Intent(this, DemoActivity.class);
 			tutscreen.putExtra("HELP", true);
 			startActivity(tutscreen);
 		}
@@ -153,7 +152,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 							   MediaRecorder.VideoSource.CAMERA, 
 							   CamcorderProfile.QUALITY_LOW);
 		
-		TimerController.startCountDownResponseTimer(TRIAL_NUMBER);		
+		TimerController.startCountDownResponseTimer(TRIAL_NUMBER);
 		spinningcircle.setVisibility(View.VISIBLE);
 	}
 	
@@ -165,7 +164,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		help.setVisibility(View.VISIBLE);
 		spinningcircle.setVisibility(View.GONE);
 	}
-
+	
 	/**
 	 * This method sets the camera preview on the surface holder
 	 */
@@ -179,15 +178,15 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		}
 		catch (IOException e) {
 			Log.v(CLASSTAG, "Could not start the preview");
-			e.printStackTrace();
+				e.printStackTrace();
 		}
 	}
-
+	
 	@Override
 	public void onPause() {
 		super.onPause();
 		notify.setVisibility(View.GONE);
-
+	
 		// When paused, release the recorder and delete the video file
 		if (!previewRecorder.isNull()) {
 			stop();
@@ -195,7 +194,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		else previewRecorder.releaseRecorder();
 		
 		FileProcessor.DeleteFile(getFilesDir() + "/trials0.mp4");
-		
+			
 	}
 	
 	@Override
@@ -211,7 +210,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		// TODO Auto-generated method stub
 		Log.v(CLASSTAG, "errored out!");
 	}
-
+	
 	@Override
 	public void onInfo(MediaRecorder mr, int what, int extra) {
 		// TODO Auto-generated method stub
@@ -240,42 +239,42 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				// TODO Auto-generated method stub
-				if (which == Dialog.BUTTON_POSITIVE) {
-					stop();
-					TimerController.stopTimer();
-					TRIAL_NUMBER += 1;
-					previewRecorder.addVideoData(videoData);
-					TimerController.showDelayAfterFinishTimer();
-				}
-				else if (which == Dialog.BUTTON_NEGATIVE) {
-					if (TRIAL_NUMBER < 3){
-						spinningcircle.setVisibility(View.VISIBLE);
-						TRIAL_NUMBER += 1;
-						TimerController.startCountDownResponseTimer(TRIAL_NUMBER);
-					}
-				}
-				else if(which == Dialog.BUTTON_NEUTRAL) {
-					stop();
-					TimerController.stopTimer();
-					TimerController.showRestartMessage();
-					Log.v("NU", "NUTREAL");
-				}
-				
-				if (TRIAL_NUMBER == 1) {
-					videoData.setTrial_1_time();
-				}
-				else if (TRIAL_NUMBER == 2) {
-					videoData.setTrial_2_time();
-				}
-				else if (TRIAL_NUMBER == 3) {
-					spinningcircle.setVisibility(View.GONE);
-					videoData.setTrial_3_time();
-					previewRecorder.addVideoData(videoData);
-					stop();
-					TimerController.showDelayAfterFinishTimer();
-				}
-				
-				Log.v("Click", Integer.toString(which));
+		if (which == Dialog.BUTTON_POSITIVE) {
+			stop();
+			TimerController.stopTimer();
+			TRIAL_NUMBER += 1;
+			previewRecorder.addVideoData(videoData);
+			TimerController.showDelayAfterFinishTimer();
+		}
+		else if (which == Dialog.BUTTON_NEGATIVE) {
+			if (TRIAL_NUMBER < 3){
+				spinningcircle.setVisibility(View.VISIBLE);
+				TRIAL_NUMBER += 1;
+				TimerController.startCountDownResponseTimer(TRIAL_NUMBER);
+			}
+		}
+		else if(which == Dialog.BUTTON_NEUTRAL) {
+			stop();
+			TimerController.stopTimer();
+			TimerController.showRestartMessage();
+			Log.v("NU", "NUTREAL");
+		}
+		
+		if (TRIAL_NUMBER == 1) {
+			videoData.setTrial_1_time();
+		}
+		else if (TRIAL_NUMBER == 2) {
+			videoData.setTrial_2_time();
+		}
+		else if (TRIAL_NUMBER == 3) {
+			spinningcircle.setVisibility(View.GONE);
+			videoData.setTrial_3_time();
+			previewRecorder.addVideoData(videoData);
+			stop();
+			TimerController.showDelayAfterFinishTimer();
+		}
+		
+		Log.v("Click", Integer.toString(which));
 			}
 		};
 		
@@ -284,7 +283,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		.setPositiveButton("Yes", responseListener);
 		responseBuilder.setNegativeButton("No", responseListener);
 		responseBuilder.setNeutralButton("Discard", responseListener);
-		
+			
 		return responseBuilder.create();
 	}
 	
@@ -292,13 +291,12 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		responseBuilder = new Builder(this);
 		responseBuilder.setMessage("We're Sorry! You did not respond so we discarded your trial!")
 		.setPositiveButton("Ok! Let's Retry", null);
-		return responseBuilder.create();
-	}
-
+			return responseBuilder.create();
+		}
+	
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
-
+	
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {}
 }
-
