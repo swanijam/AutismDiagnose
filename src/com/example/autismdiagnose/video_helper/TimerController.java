@@ -26,16 +26,16 @@ import android.widget.TextView;
 
 public class TimerController {
 	
-	private Context context;
-	private CountDownTimer currentTimer;
-	private CountDownTimer delayTimer;
-	private SpinningCircle spinningcircle;
-	private PromptAnimations animateprompt;
+	private Context Context;
+	private CountDownTimer CurrentTimer;
+	private CountDownTimer DelayTimer;
+	private SpinningCircle SpinningCircle;
+	private PromptAnimations AnimatePrompt;
 	
 	private Button start;
-	
-	private int TRIAL_NUMBER;
-	private int RECORDING_LIMIT;
+
+	private int TrialNumber;
+	private int RecordingLimit;
 	private final int DIALOG_DISMISS_DELAY = 7000;
 	// Dictionary to store the several textViews that are used.
 	private HashMap<String, TextView> TEXTVIEWS = new HashMap<String, TextView>();
@@ -44,21 +44,21 @@ public class TimerController {
 	private HashMap<String, AlertDialog> DIALOGS = new HashMap<String, AlertDialog>();
 	
 	// Public constructor requires all the components that will be used
-	public TimerController(Context context,
-			      SpinningCircle TimerAnimation, int RECORDING_LIMIT, 
+	public TimerController(Context Context,
+			      SpinningCircle TimerAnimation, int RecordingLimit, 
 			      Button start) {
 		
-		this.context = context;
-		this.spinningcircle = TimerAnimation;
+		this.Context = Context;
+		this.SpinningCircle = TimerAnimation;
 		this.start = start;
-		this.RECORDING_LIMIT = RECORDING_LIMIT;
-		this.animateprompt = new PromptAnimations(context);
+		this.RecordingLimit = RecordingLimit;
+		this.AnimatePrompt = new PromptAnimations(Context);
 		
 		
 	}
 	
 	private void dismissDialog() {
-		delayTimer = new CountDownTimer(DIALOG_DISMISS_DELAY, 1000) {
+		DelayTimer = new CountDownTimer(DIALOG_DISMISS_DELAY, 1000) {
 			@Override
 			public void onTick(long arg0){}
 			@Override
@@ -68,12 +68,12 @@ public class TimerController {
 				DIALOGS.get("waitout").show();
 			}
 		};
-		delayTimer.start();
+		DelayTimer.start();
 	}
 	
 	public void cancelDelayTimer() {
-		if (delayTimer != null)
-			delayTimer.cancel();
+		if (DelayTimer != null)
+			DelayTimer.cancel();
 	}
 	
 	
@@ -83,44 +83,59 @@ public class TimerController {
 	 * @param trialNumber (NOTE: You must set a 'response' dialog for this method to function)
 	 * @return true if the timer was successfully started.
 	 */
-	public boolean startCountDownResponseTimer(int trialNumber) {
+	public boolean startCountDownResponseTimer(int currentTrialNumber) {
 		cancelDelayTimer();
 		hideAllTextView();
 
-		TRIAL_NUMBER = trialNumber;
-		if (TRIAL_NUMBER == 3) {
+		TrialNumber = currentTrialNumber;
+		if (TrialNumber == 3) {
 			return false;
 		}
 		
 		// Start a new timer everytime this method is called.
-		if (currentTimer != null) {
+		if (CurrentTimer != null) {
 			Log.v("canceled Timer", "true");
-			currentTimer.cancel();
+			CurrentTimer.cancel();
 		}
 		
-		animateprompt.animateNotifyStart(TEXTVIEWS.get("notify"), true);
+		// The notification slides in, waits for 2 seconds, then
+		// leaves the screen to reveal the spinning circle.
 		
-		currentTimer = new CountDownTimer(RECORDING_LIMIT, 1) {
+		AnimatePrompt.animateNotifyStart(TEXTVIEWS.get("notify"));
+		CurrentTimer = new CountDownTimer(2000, 1000) {		
+			@Override
+			public void onTick(long millisUntilFinished) {}		
+			@Override
+			public void onFinish() {
+				AnimatePrompt.dismissNotify(TEXTVIEWS.get("notify"), false);
+				Log.v("I Got", "Now I'm GOING AWAY SHIT");
+				startResponseTimer();
+			}
+		}.start();
+		
+		return true;
+	}
+	
+	public void startResponseTimer() {
+		CurrentTimer.cancel();
+		CurrentTimer = new CountDownTimer(RecordingLimit, 1) {
 			@Override
 			public void onTick(long mills) {
-				spinningcircle.invalidate();
+				SpinningCircle.invalidate();
 			}
 			@Override
 			public void onFinish() {
 				try {
-					animateprompt.dismissNotify(TEXTVIEWS.get("notify"), false);
-					
 					// Show prompt and reset the spinning circle animation
 					DIALOGS.get("response").show();
 					dismissDialog();
 					SpinningCircle.arcwidth = 360;
-					spinningcircle.setVisibility(View.INVISIBLE);
+					SpinningCircle.setVisibility(View.INVISIBLE);
 				}
 				catch(Exception e) {}
 			}
 		}.start();
 		
-		return true;
 	}
 
 	/**
@@ -131,14 +146,14 @@ public class TimerController {
 	public void showDelayAfterFinishTimer() {
 		start.setEnabled(false);
 		TEXTVIEWS.get("disableMessage").setVisibility(View.VISIBLE);
-		Animation SlideIn = AnimationUtils.loadAnimation(context, R.anim.slide_left);
+		Animation SlideIn = AnimationUtils.loadAnimation(Context, R.anim.slide_left);
 		TEXTVIEWS.get("disableMessage").startAnimation(SlideIn);
 		
-		if (currentTimer != null) {
-			currentTimer.cancel();
+		if (CurrentTimer != null) {
+			CurrentTimer.cancel();
 		}
 		
-		currentTimer = new CountDownTimer(10000, 1000) {
+		CurrentTimer = new CountDownTimer(10000, 1000) {
 			@Override
 			public void onTick(long mills) {
 			}
@@ -146,7 +161,7 @@ public class TimerController {
 			public void onFinish() {
 				start.setEnabled(true);
 				
-				Animation FadeOut = AnimationUtils.loadAnimation(context, R.anim.fade_out);
+				Animation FadeOut = AnimationUtils.loadAnimation(Context, R.anim.fade_out);
 				TEXTVIEWS.get("disableMessage").startAnimation(FadeOut);
 				TEXTVIEWS.get("disableMessage").setVisibility(View.GONE);
 			}
@@ -154,21 +169,21 @@ public class TimerController {
 	}// end showDelay
 	
 	public void showRestartMessage() {
-		if (currentTimer != null) {
-			currentTimer.cancel();
+		if (CurrentTimer != null) {
+			CurrentTimer.cancel();
 		}
 		
 		TEXTVIEWS.get("restart").setVisibility(View.VISIBLE);
-		Animation FadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in);
+		Animation FadeIn = AnimationUtils.loadAnimation(Context, R.anim.fade_in);
 		TEXTVIEWS.get("restart").startAnimation(FadeIn);
 		start.setEnabled(false);
-		currentTimer = new CountDownTimer(1500, 1000) {
+		CurrentTimer = new CountDownTimer(1500, 1000) {
 			@Override
 			public void onTick(long mills) {
 			}
 			@Override
 			public void onFinish() {				
-				Animation FadeOut = AnimationUtils.loadAnimation(context, R.anim.fade_out);
+				Animation FadeOut = AnimationUtils.loadAnimation(Context, R.anim.fade_out);
 				TEXTVIEWS.get("restart").startAnimation(FadeOut);
 				TEXTVIEWS.get("restart").setVisibility(View.GONE);
 				start.setEnabled(true);
@@ -177,8 +192,8 @@ public class TimerController {
 	}
 	
 	public void stopTimer() {
-		if (currentTimer != null)
-			currentTimer.cancel();
+		if (CurrentTimer != null)
+			CurrentTimer.cancel();
 		cancelDelayTimer();
 	}
 	

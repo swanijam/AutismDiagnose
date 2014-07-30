@@ -27,7 +27,7 @@ public class TimerTutorialListener implements  OnShowcaseEventListener {
 	public void onShowcaseViewDidHide(ShowcaseView showcaseView) {
 		TextView notify = (TextView) activity.findViewById(R.id.notify);
 		PromptAnimations pm = new PromptAnimations(activity.getApplicationContext());
-		pm.animateNotifyStart(notify, false);
+		pm.animateNotifyStart(notify);
 		
 		// Hide spinning circle
 		activity.findViewById(R.id.spinningcircle).setVisibility(View.GONE);
