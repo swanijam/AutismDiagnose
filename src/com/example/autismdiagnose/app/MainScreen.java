@@ -33,7 +33,7 @@ public class MainScreen extends Activity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				switchToTutorials();
+				
 			}
 		});
 		
@@ -50,9 +50,6 @@ public class MainScreen extends Activity {
 			SWITCHED_FROM_HELP = bundle.getBoolean("HELP");
 		}
 		
-		if (SWITCHED_FROM_HELP == true) {
-			switchToTutorials();
-		}
 	}
 
 	public void switchToVideoAndDestroy() {
@@ -60,11 +57,6 @@ public class MainScreen extends Activity {
 		videoUI.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 		startActivity(videoUI);
 		finish();
-	}
-	
-	public void switchToTutorials() {
-		Intent videoUI = new Intent(this, Tutorial.class);
-		startActivity(videoUI);
 	}
 	
 	@Override

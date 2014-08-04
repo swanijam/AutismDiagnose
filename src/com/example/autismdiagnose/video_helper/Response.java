@@ -17,6 +17,10 @@ public class Response {
 		start_time = getCurrentTime();
 	}
 
+	public String getPath() {
+		return path;
+	}
+	
 	public DateTime getTrial_1_time() {
 		return trial_1_time;
 	}

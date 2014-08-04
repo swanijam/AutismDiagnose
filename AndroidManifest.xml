@@ -20,39 +20,37 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.example.autismdiagnose.app.MainScreen"
+            android:name=".app.MainScreen"
             android:label="@string/app_name" >
-       
         </activity>
-        
         <activity
-            android:name="com.example.autismdiagnose.app.VideoUI"
+            android:name=".app.VideoUI"
             android:label="@string/title_activity_video_ui" >
         </activity>
         <activity
-            android:name="com.example.autismdiagnose.app.TutorialVideo"
+            android:name=".app.TutorialVideo"
             android:label="@string/title_activity_tutorials"
-            android:parentActivityName="com.example.autismdiagnose.app.Tutorial" >
+            android:parentActivityName=".app.Tutorial" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.autismdiagnose.Tutorial" />
         </activity>
         <activity
-            android:name="com.example.autismdiagnose.app.Tutorial"
+            android:name=".app.Tutorial"
             android:label="@string/title_activity_tutorial"
-            android:parentActivityName="com.example.autismdiagnose.app.VideoUI" >
+            android:parentActivityName=".app.VideoUI" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.autismdiagnose.VideoUI" />
         </activity>
         <activity
-            android:name="com.example.autismdiagnose.app.DemoActivity"
+            android:name=".app.DemoActivity"
             android:label="@string/title_activity_demo" >
-           <intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter> 
+            </intent-filter>
         </activity>
     </application>
 

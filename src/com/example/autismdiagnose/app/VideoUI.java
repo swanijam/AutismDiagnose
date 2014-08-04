@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.Camera;
@@ -12,6 +13,7 @@ import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnErrorListener;
 import android.media.MediaRecorder.OnInfoListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -58,23 +60,26 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	private SpinningCircle spinningcircle;
 	private static TimerController TimerController;
 	
-	private AndroidPreviewRecorder previewRecorder;
+	private AndroidPreviewRecorder PreviewRecorder;
 	
 	// Response to ask the user if the child responded (Yes, No)
-	private Builder responseBuilder;
+	private Builder ResponseBuilder;
 		
 	private static final int RECORDINGLIMIT = 5000;
 	
 	// Every new trial prompts the user 3 times to call the childs name
 	// and 3 times to input if he/she responded or not. This variable is
 	// reset at the beginning of a new trial.
-	private static int TRIAL_NUMBER=0;
+	private static int TrialNumber=0;
+	
+	private boolean FinishedTrial = false;
 	
 	// Stores start time and response time information as well as the
 	// location of the video file for each trial.
 	private static Response videoData;
-	
+
 	private static final String CLASSTAG = "VideoUI";
+
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -101,9 +106,9 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		// Set up the videoView
 		holder = videoView.getHolder();
 		holder.addCallback(this);
-		previewRecorder = new AndroidPreviewRecorder(cam, recorder);
+		PreviewRecorder = new AndroidPreviewRecorder(cam, recorder);
 		
-		responseBuilder = new Builder(this);
+		ResponseBuilder = new Builder(this);
 		spinningcircle = (SpinningCircle) findViewById(R.id.spinningcircle);
 		
 		
@@ -140,24 +145,24 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		start.setVisibility(View.GONE);
 		help.setVisibility(View.GONE);
 		
-		TRIAL_NUMBER = 0;
+		TrialNumber = 0;
 		
 		// Start a new recording session
 		String outputFile = getFilesDir() + "/trials0.mp4";
 		videoData = new Response(outputFile);
 		
-		previewRecorder.record(this, holder, 
+		PreviewRecorder.record(this, holder, 
 							   outputFile, 
 							   MediaRecorder.AudioSource.DEFAULT, 
 							   MediaRecorder.VideoSource.CAMERA, 
 							   CamcorderProfile.QUALITY_LOW);
 		
-		TimerController.startCountDownResponseTimer(TRIAL_NUMBER);
+		TimerController.startCountDownResponseTimer(TrialNumber);
 		spinningcircle.setVisibility(View.VISIBLE);
 	}
 	
 	public void stop() {
-		previewRecorder.stopRecorder();
+		PreviewRecorder.stopRecorder();
 		TimerController.stopTimer();
 		
 		start.setVisibility(View.VISIBLE);
@@ -174,7 +179,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		// Once the holder is set up, we can plop the camera preview
 		// onto it.
 		try {
-			previewRecorder.startCameraPreview(this, holder);
+			PreviewRecorder.startCameraPreview(this, holder);
 		}
 		catch (IOException e) {
 			Log.v(CLASSTAG, "Could not start the preview");
@@ -188,10 +193,10 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		notify.setVisibility(View.GONE);
 	
 		// When paused, release the recorder and delete the video file
-		if (!previewRecorder.isNull()) {
+		if (!PreviewRecorder.isNull()) {
 			stop();
 		}
-		else previewRecorder.releaseRecorder();
+		else PreviewRecorder.releaseRecorder();
 		
 		FileProcessor.DeleteFile(getFilesDir() + "/trials0.mp4");
 			
@@ -201,7 +206,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	public void onResume() {
 		super.onResume();
 		//stop.setEnabled(false);
-		previewRecorder.initializeCamera(this);
+		PreviewRecorder.initializeCamera(this);
 		Log.v(CLASSTAG, "In Resumed");
 	}
 	
@@ -219,7 +224,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 			FileProcessor.DeleteFile(getFilesDir() + "/trials0.mp4");
 			videoData = new Response(null);
 			videoData.setNoResponse(true);
-			previewRecorder.addVideoData(videoData);
+			PreviewRecorder.addVideoData(videoData);
 		}		
 		Log.v(CLASSTAG, "recording!!");
 	}
@@ -239,59 +244,63 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				// TODO Auto-generated method stub
-		if (which == Dialog.BUTTON_POSITIVE) {
-			stop();
-			TimerController.stopTimer();
-			TRIAL_NUMBER += 1;
-			previewRecorder.addVideoData(videoData);
-			TimerController.showDelayAfterFinishTimer();
+				if (which == Dialog.BUTTON_POSITIVE) {
+					stop();
+					TimerController.stopTimer();
+					TrialNumber += 1;
+					PreviewRecorder.addVideoData(videoData);
+					TimerController.showDelayAfterFinishTimer();
+					FinishedTrial = true;
+				}
+				else if (which == Dialog.BUTTON_NEGATIVE) {
+					if (TrialNumber < 3){
+						spinningcircle.setVisibility(View.VISIBLE);
+						TrialNumber += 1;
+						TimerController.startCountDownResponseTimer(TrialNumber);
+					}
+				}
+				else if(which == Dialog.BUTTON_NEUTRAL) {
+					stop();
+					TimerController.stopTimer();
+					TimerController.showRestartMessage();
+					Log.v("NU", "NUTREAL");
+				}
+				
+				if (TrialNumber == 1) {
+					videoData.setTrial_1_time();
+				}
+				else if (TrialNumber == 2) {
+					videoData.setTrial_2_time();
+				}
+				else if (TrialNumber == 3) {
+					spinningcircle.setVisibility(View.GONE);
+					videoData.setTrial_3_time();
+					PreviewRecorder.addVideoData(videoData);
+					stop();
+					FinishedTrial = true;
+					TimerController.showDelayAfterFinishTimer();
+				}
+				
+				if (FinishedTrial) {
+					new UploadFile().execute("TestVideo", videoData.getPath());
+				}
 		}
-		else if (which == Dialog.BUTTON_NEGATIVE) {
-			if (TRIAL_NUMBER < 3){
-				spinningcircle.setVisibility(View.VISIBLE);
-				TRIAL_NUMBER += 1;
-				TimerController.startCountDownResponseTimer(TRIAL_NUMBER);
-			}
-		}
-		else if(which == Dialog.BUTTON_NEUTRAL) {
-			stop();
-			TimerController.stopTimer();
-			TimerController.showRestartMessage();
-			Log.v("NU", "NUTREAL");
-		}
-		
-		if (TRIAL_NUMBER == 1) {
-			videoData.setTrial_1_time();
-		}
-		else if (TRIAL_NUMBER == 2) {
-			videoData.setTrial_2_time();
-		}
-		else if (TRIAL_NUMBER == 3) {
-			spinningcircle.setVisibility(View.GONE);
-			videoData.setTrial_3_time();
-			previewRecorder.addVideoData(videoData);
-			stop();
-			TimerController.showDelayAfterFinishTimer();
-		}
-		
-		Log.v("Click", Integer.toString(which));
-			}
 		};
 		
 		// Show the dialog and determine if there was a response
-		responseBuilder.setMessage("\tWas there a response? \n\t(answer within 5 seconds)")
+		ResponseBuilder.setMessage("Was there a response? \n\t(answer within 5 seconds)")
 		.setPositiveButton("Yes", responseListener);
-		responseBuilder.setNegativeButton("No", responseListener);
-		responseBuilder.setNeutralButton("Discard", responseListener);
+		ResponseBuilder.setNegativeButton("No", responseListener);
+		ResponseBuilder.setNeutralButton("Discard", responseListener);
 			
-		return responseBuilder.create();
+		return ResponseBuilder.create();
 	}
 	
 	private AlertDialog setWaitOutDialogListener() {
-		responseBuilder = new Builder(this);
-		responseBuilder.setMessage("We're Sorry! You did not respond so we discarded your trial!")
+		ResponseBuilder = new Builder(this);
+		ResponseBuilder.setMessage("We're Sorry! You did not respond so we discarded your trial!")
 		.setPositiveButton("Ok! Let's Retry", null);
-			return responseBuilder.create();
+			return ResponseBuilder.create();
 		}
 	
 	@Override
@@ -299,4 +308,26 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {}
+	
+	private class UploadFile extends AsyncTask<String, Integer, Integer> {
+		
+	     protected Integer doInBackground(String ... params) {
+			 String fileName = params[0];
+			 String filePath = params[1];
+			 start.setText("Uploadin Brotha ...");
+			 FileProcessor.Upload(fileName, filePath);
+			 
+	    	 return 0;
+	     }
+
+	     protected void onProgressUpdate(Integer... progress) {
+	         
+	     }
+
+	     protected void onPostExecute(Integer result) {
+	    	 start.setText("Start");
+	     }
+	 }
+
+
 }

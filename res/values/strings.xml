@@ -8,5 +8,6 @@
     <string name="title_activity_tutorials">Tutorials</string>
     <string name="title_activity_tutorial">Tutorial</string>
     <string name="title_activity_demo">DemoActivity</string>
+    <string name="title_activity_test">Test</string>
 
 </resources>

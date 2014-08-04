@@ -3,14 +3,24 @@ package com.example.autismdiagnose.android_helpers;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
+import com.amazonaws.auth.PropertiesCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
+
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 /**
  * 
@@ -20,6 +30,31 @@ import android.content.Context;
 public class FileProcessor {
 	
 	public static ArrayList<String> videos = new ArrayList<String>();
+	
+	public static void Upload(String fileName, String filePath) {
+		try {
+		  String existingBucketName = "AutismDiagnose";
+		  String amazonFileUploadLocationOriginal=existingBucketName;
+		  
+
+		  AmazonS3 s3Client;
+		
+		  s3Client = new AmazonS3Client(
+					  new PropertiesCredentials(
+							  FileProcessor.class.getResourceAsStream("AwsCredentials.properties")));
+
+		  FileInputStream stream = new FileInputStream(filePath);
+		  ObjectMetadata objectMetadata = new ObjectMetadata();
+		  PutObjectRequest putObjectRequest = new PutObjectRequest(
+				  amazonFileUploadLocationOriginal, fileName, stream, objectMetadata);
+		  PutObjectResult result = s3Client.putObject(putObjectRequest);
+		  Log.i("UPLOADED", "Etag:" + result.getETag() + "-->" + result);
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	public static boolean write_append(Activity activity, String data, String path) {
 		FileWriter writer;
