@@ -1,5 +1,6 @@
 package com.example.autismdiagnose.app;
 
+import java.io.File;
 import java.io.IOException;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -7,12 +8,15 @@ import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnErrorListener;
 import android.media.MediaRecorder.OnInfoListener;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -47,6 +51,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		
 		// "Please Say Your Child's Name" message
 	TextView notify;
+	TextView startTrialMessage;
 	
 	private Button help;
 	private Button start;
@@ -85,13 +90,31 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_video_ui);
-	 
+		
+		// The user must have the internet on. If not, quit the application
+		if (!isNetworkAvailable()) {
+			Builder builder = new Builder(this);
+			builder.setMessage("You are not connected to the Internet!");
+			builder.setPositiveButton("Ok", null);
+			
+			AlertDialog error = builder.create();
+			error.setOnDismissListener(new DialogInterface.OnDismissListener() {
+				@Override
+				public void onDismiss(final DialogInterface dialog) {
+					killApp();
+				}
+			});
+			
+			error.show();
+		}
+		
+		
 		// Retrieve UI elements
 		// "Please Say Your Child's Name" message
 		notify = (TextView) findViewById(R.id.notify);
 		
 		// Help text for start trial button
-		TextView startTrialMessage = (TextView) findViewById(R.id.startTrialMessage);
+		startTrialMessage = (TextView) findViewById(R.id.startTrialMessage);
 		startTrialMessage.setVisibility(View.VISIBLE);
 		
 		// Message displayed when "Start Trial" button is disabled
@@ -146,6 +169,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		help.setVisibility(View.GONE);
 		
 		TrialNumber = 0;
+		FinishedTrial = false;
 		
 		// Start a new recording session
 		String outputFile = getFilesDir() + "/trials0.mp4";
@@ -161,12 +185,20 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		spinningcircle.setVisibility(View.VISIBLE);
 	}
 	
+	
+	// Method for Killing the application completely. Done if the Internet connection is not on.
+	public void killApp() {
+		this.finish();
+		android.os.Process.killProcess( android.os.Process.myPid() ); 
+	}
+	
 	public void stop() {
 		PreviewRecorder.stopRecorder();
 		TimerController.stopTimer();
 		
 		start.setVisibility(View.VISIBLE);
 		help.setVisibility(View.VISIBLE);
+		startTrialMessage.setVisibility(View.VISIBLE);
 		spinningcircle.setVisibility(View.GONE);
 	}
 	
@@ -245,7 +277,6 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 			public void onClick(DialogInterface dialog, int which) {
 				// TODO Auto-generated method stub
 				if (which == Dialog.BUTTON_POSITIVE) {
-					stop();
 					TimerController.stopTimer();
 					TrialNumber += 1;
 					PreviewRecorder.addVideoData(videoData);
@@ -276,13 +307,13 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 					spinningcircle.setVisibility(View.GONE);
 					videoData.setTrial_3_time();
 					PreviewRecorder.addVideoData(videoData);
-					stop();
 					FinishedTrial = true;
 					TimerController.showDelayAfterFinishTimer();
 				}
 				
 				if (FinishedTrial) {
-					new UploadFile().execute("TestVideo", videoData.getPath());
+					stop();
+					new UploadFile().execute("LegitVideo", videoData.getPath());
 				}
 		}
 		};
@@ -292,7 +323,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		.setPositiveButton("Yes", responseListener);
 		ResponseBuilder.setNegativeButton("No", responseListener);
 		ResponseBuilder.setNeutralButton("Discard", responseListener);
-			
+	
 		return ResponseBuilder.create();
 	}
 	
@@ -309,25 +340,43 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {}
 	
-	private class UploadFile extends AsyncTask<String, Integer, Integer> {
-		
-	     protected Integer doInBackground(String ... params) {
+	// Method to check if the Internet is available
+	// Taken from www.stackoverflow.com
+	private boolean isNetworkAvailable() {
+	    ConnectivityManager connectivityManager 
+	          = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+	    NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+	    return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+	}
+	
+	private class UploadFile extends AsyncTask<String, Integer, String> {
+	
+	     protected String doInBackground(String ... params) {
 			 String fileName = params[0];
 			 String filePath = params[1];
-			 start.setText("Uploadin Brotha ...");
-			 FileProcessor.Upload(fileName, filePath);
+			 start.setText("Uploading ...");
 			 
-	    	 return 0;
+			 try {
+				 FileProcessor.Upload(fileName, filePath);
+			 } catch(Exception e) {
+				 Builder failed = new Builder(VideoUI.this.getBaseContext());
+				 failed.setMessage("Your Upload could not go through! Make sure the Internet is on and please retry the Trial.");
+				 failed.setPositiveButton("Ok", null);
+				 failed.show();
+			 }
+			 
+	    	 return filePath;
 	     }
 
-	     protected void onProgressUpdate(Integer... progress) {
-	         
-	     }
-
-	     protected void onPostExecute(Integer result) {
-	    	 start.setText("Start");
+	     protected void onPostExecute(String filePath) {
+	    	 start.setText("start");
+	    	 TimerController.dismissDelayAfterFinish();
+	    	 
+	    	 // Delete the File from the device
+	    	 try {
+	    		 File file = new File(filePath);
+	    		 file.delete();
+	    	 } catch (Exception e) {}
 	     }
 	 }
-
-
 }

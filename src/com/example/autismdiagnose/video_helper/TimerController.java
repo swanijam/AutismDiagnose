@@ -153,20 +153,23 @@ public class TimerController {
 			CurrentTimer.cancel();
 		}
 		
-		CurrentTimer = new CountDownTimer(10000, 1000) {
+		CurrentTimer = new CountDownTimer(3000, 1000) {
 			@Override
 			public void onTick(long mills) {
 			}
 			@Override
 			public void onFinish() {
-				start.setEnabled(true);
-				
-				Animation FadeOut = AnimationUtils.loadAnimation(Context, R.anim.fade_out);
-				TEXTVIEWS.get("disableMessage").startAnimation(FadeOut);
-				TEXTVIEWS.get("disableMessage").setVisibility(View.GONE);
 			}
 		}.start();
 	}// end showDelay
+	
+	public void dismissDelayAfterFinish() {
+		start.setEnabled(true);
+		
+		Animation FadeOut = AnimationUtils.loadAnimation(Context, R.anim.fade_out);
+		TEXTVIEWS.get("disableMessage").startAnimation(FadeOut);
+		TEXTVIEWS.get("disableMessage").setVisibility(View.GONE);
+	}
 	
 	public void showRestartMessage() {
 		if (CurrentTimer != null) {

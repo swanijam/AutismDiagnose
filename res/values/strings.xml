@@ -9,5 +9,7 @@
     <string name="title_activity_tutorial">Tutorial</string>
     <string name="title_activity_demo">DemoActivity</string>
     <string name="title_activity_test">Test</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_sate">Sate</string>
 
 </resources>

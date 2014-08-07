@@ -11,12 +11,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.PropertiesCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
+import com.readystatesoftware.simpl3r.Uploader;
 
 import android.app.Activity;
 import android.content.Context;
@@ -31,29 +33,37 @@ public class FileProcessor {
 	
 	public static ArrayList<String> videos = new ArrayList<String>();
 	
-	public static void Upload(String fileName, String filePath) {
-		try {
+	
+	public static void FileUpload(String fileName, String filePath, Context context) {
+		AmazonS3Client s3Client = new AmazonS3Client(
+				new BasicAWSCredentials("AKIAJDZ6WYRV24WOIIOA",
+										"3fuG2mdBS88Q2YlziY5XYdlTAaipztV6GyKEPz7A"));
+		
+		File file = new File(filePath);
+		// Create an amazon uploader
+		Uploader uploader = new Uploader(context, s3Client, "AutismDiagnose", fileName, file);
+	}
+	
+	
+	
+	public static void Upload(String fileName, String filePath) throws Exception{
 		  String existingBucketName = "AutismDiagnose";
 		  String amazonFileUploadLocationOriginal=existingBucketName;
 		  
-
 		  AmazonS3 s3Client;
-		
 		  s3Client = new AmazonS3Client(
 					  new PropertiesCredentials(
 							  FileProcessor.class.getResourceAsStream("AwsCredentials.properties")));
 
+		  // Stream the file to the server
 		  FileInputStream stream = new FileInputStream(filePath);
 		  ObjectMetadata objectMetadata = new ObjectMetadata();
+		  
+		  // Put in the PUT request to the server
 		  PutObjectRequest putObjectRequest = new PutObjectRequest(
 				  amazonFileUploadLocationOriginal, fileName, stream, objectMetadata);
-		  PutObjectResult result = s3Client.putObject(putObjectRequest);
-		  Log.i("UPLOADED", "Etag:" + result.getETag() + "-->" + result);
+		  s3Client.putObject(putObjectRequest);
 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 	public static boolean write_append(Activity activity, String data, String path) {
