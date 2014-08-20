@@ -2,6 +2,7 @@ package com.example.autismdiagnose.app;
 
 import com.example.autismdiagnose.R;
 import com.example.autismdiagnose.android_helpers.SpinningCircle;
+import com.example.autismdiagnose.tutorial.ImageSlider;
 import com.example.autismdiagnose.tutorial.TimerTutorialListener;
 import com.example.autismdiagnose.tutorial.TutorialHelper;
 import com.example.autismdiagnose.video_helper.VideoPreviewActivity;
@@ -17,9 +18,12 @@ import android.content.SharedPreferences;
 import android.view.Menu;
 import android.view.SurfaceHolder;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageSwitcher;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -28,8 +32,7 @@ import android.widget.TextView;
  * @author Sheperd
  *
  */
-public class DemoActivity extends Activity implements 
-OnShowcaseEventListener {
+public class DemoActivity extends Activity {
 
 	ShowcaseView sv;
 	TutorialHelper tutorial;
@@ -43,7 +46,7 @@ OnShowcaseEventListener {
 		setContentView(R.layout.activity_demo);
 		//setUpVideoView(this);
 		
-		Bundle bundle = getIntent().getExtras();
+		/*Bundle bundle = getIntent().getExtras();
 		SharedPreferences prefs = this.getSharedPreferences(
 				  "com.example.autismdiagnose", 
 				  Context.MODE_PRIVATE);
@@ -54,23 +57,34 @@ OnShowcaseEventListener {
 			switchToVideoAndDestroy();
 		}
 		else {
-			RelativeLayout.LayoutParams lps = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-	        lps.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-	        lps.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-	        int margin = ((Number) (getResources().getDisplayMetrics().density * 20)).intValue();
-	        lps.setMargins(margin, margin, margin, margin);
-			
-			ViewTarget target = new ViewTarget(R.id.startTrial, this);
-			tutorial = new TutorialHelper(this, lps);
-			
-			tutorial.createStartButtonHelp(target, this);
-			tutorial.showHelp();
-			
-			start = (Button) findViewById(R.id.startTrial);
-			sc = (SpinningCircle) findViewById(R.id.spinningcircle);
 		}
+		*/
+		Button startTut = (Button) findViewById(R.id.startTut);
+		Button finishTut = (Button) findViewById(R.id.finish);
+		
+		startTut.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startSlides(v);
+			}
+		});
+		
+		finishTut.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				switchToVideoAndDestroy();
+			}
+		});
 	}
 
+	public void startSlides(View v) {
+		v.setVisibility(View.GONE);
+		ImageSlider is = new ImageSlider(this);
+		is.reset();
+		is.switchImage(getApplicationContext(), 
+				(ImageView) findViewById(R.id.slide_1), (ImageView) findViewById(R.id.slide_2));
+	}
+	
 	public void onClick(View view) {
 		if (view.getId() == start.getId()) {
 			tutorial.hideHelp();
@@ -100,11 +114,4 @@ OnShowcaseEventListener {
 		super.onPause();
 		//handlePause();
 	}
-	
-	@Override
-	public void onShowcaseViewHide(ShowcaseView showcaseView) {}
-	@Override
-	public void onShowcaseViewDidHide(ShowcaseView showcaseView) {}
-	@Override
-	public void onShowcaseViewShow(ShowcaseView showcaseView) {}
 }

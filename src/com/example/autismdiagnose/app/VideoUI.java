@@ -6,10 +6,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
+import android.provider.Settings.Secure;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
@@ -19,6 +20,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.View;
@@ -26,6 +28,7 @@ import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.example.autismdiagnose.R;
@@ -34,6 +37,8 @@ import com.example.autismdiagnose.android_helpers.SpinningCircle;
 import com.example.autismdiagnose.video_helper.AndroidPreviewRecorder;
 import com.example.autismdiagnose.video_helper.Response;
 import com.example.autismdiagnose.video_helper.TimerController;
+
+
 
 /**
  * @author Sheik Hassan
@@ -50,16 +55,16 @@ public class VideoUI extends Activity implements
 SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		
 		// "Please Say Your Child's Name" message
-	TextView notify;
-	TextView startTrialMessage;
+	TextView Notify;
+	TextView StartTrialMessage;
 	
-	private Button help;
-	private Button start;
+	private Button Help;
+	private Button Start;
 	
-	private VideoView videoView;
-	private SurfaceHolder holder;
-	private Camera cam;
-	private MediaRecorder recorder;
+	private VideoView VideoView;
+	private SurfaceHolder Holder;
+	private Camera Cam;
+	private MediaRecorder Recorder;
 	
 	// Animation that shows how much time is remaining before the next notify message
 	private SpinningCircle spinningcircle;
@@ -77,6 +82,11 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	// reset at the beginning of a new trial.
 	private static int TrialNumber=0;
 	
+	// A User may upload several videos. This variable keeps track of
+	// how many videos the user has uploaded so far in order to properly
+	// name the videos uploaded to the server.
+	private int VideoNumber;
+	
 	private boolean FinishedTrial = false;
 	
 	// Stores start time and response time information as well as the
@@ -84,52 +94,43 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	private static Response videoData;
 
 	private static final String CLASSTAG = "VideoUI";
-
+	private String PhoneNumber;
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_video_ui);
 		
-		// The user must have the internet on. If not, quit the application
-		if (!isNetworkAvailable()) {
-			Builder builder = new Builder(this);
-			builder.setMessage("You are not connected to the Internet!");
-			builder.setPositiveButton("Ok", null);
-			
-			AlertDialog error = builder.create();
-			error.setOnDismissListener(new DialogInterface.OnDismissListener() {
-				@Override
-				public void onDismiss(final DialogInterface dialog) {
-					killApp();
-				}
-			});
-			
-			error.show();
-		}
+		// The user must have a valid phone number to use this App.
+		// They will provide the Phone number to the research co-ordinator
+		// and the video trials will be identified by the unique phone number
+		// of the participant.
+		phoneNumberCheck();
 		
+		// The user must have the internet on. If not, quit the application
+		networkCheck();
 		
 		// Retrieve UI elements
 		// "Please Say Your Child's Name" message
-		notify = (TextView) findViewById(R.id.notify);
+		Notify = (TextView) findViewById(R.id.notify);
 		
 		// Help text for start trial button
-		startTrialMessage = (TextView) findViewById(R.id.startTrialMessage);
-		startTrialMessage.setVisibility(View.VISIBLE);
+		StartTrialMessage = (TextView) findViewById(R.id.startTrialMessage);
+		StartTrialMessage.setVisibility(View.VISIBLE);
 		
 		// Message displayed when "Start Trial" button is disabled
 		TextView disableMessage = (TextView) findViewById(R.id.disableMessage);
 		
 		TextView restart = (TextView) findViewById(R.id.restartMessage);
 		
-		help = (Button) findViewById(R.id.help);
-		start = (Button) findViewById(R.id.startTrial);
-		videoView = (VideoView) findViewById(R.id.videoView1);
+		Help = (Button) findViewById(R.id.help);
+		Start = (Button) findViewById(R.id.startTrial);
+		VideoView = (VideoView) findViewById(R.id.videoView1);
 		
 		// Set up the videoView
-		holder = videoView.getHolder();
-		holder.addCallback(this);
-		PreviewRecorder = new AndroidPreviewRecorder(cam, recorder);
+		Holder = VideoView.getHolder();
+		Holder.addCallback(this);
+		PreviewRecorder = new AndroidPreviewRecorder(Cam, Recorder);
 		
 		ResponseBuilder = new Builder(this);
 		spinningcircle = (SpinningCircle) findViewById(R.id.spinningcircle);
@@ -140,10 +141,10 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		TimerController = new TimerController(
 						   getApplicationContext(), 
 						   spinningcircle, 
-						   RECORDINGLIMIT, start);
+						   RECORDINGLIMIT, Start);
 		
-		TimerController.setTextView("notify", notify);
-		TimerController.setTextView("startTrialMessage", startTrialMessage);
+		TimerController.setTextView("notify", Notify);
+		TimerController.setTextView("startTrialMessage", StartTrialMessage);
 		TimerController.setTextView("disableMessage", disableMessage);
 		TimerController.setTextView("restart", restart);
 		
@@ -155,9 +156,9 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	
 	public void onClick(View view) {
 		
-		if(view.getId() == start.getId())
+		if(view.getId() == Start.getId())
 			start();
-		else if (view.getId() == help.getId()) {
+		else if (view.getId() == Help.getId()) {
 			Intent tutscreen = new Intent(this, DemoActivity.class);
 			tutscreen.putExtra("HELP", true);
 			startActivity(tutscreen);
@@ -165,8 +166,8 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	}
 	
 	public void start() {
-		start.setVisibility(View.GONE);
-		help.setVisibility(View.GONE);
+		Start.setVisibility(View.GONE);
+		Help.setVisibility(View.GONE);
 		
 		TrialNumber = 0;
 		FinishedTrial = false;
@@ -175,7 +176,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		String outputFile = getFilesDir() + "/trials0.mp4";
 		videoData = new Response(outputFile);
 		
-		PreviewRecorder.record(this, holder, 
+		PreviewRecorder.record(this, Holder, 
 							   outputFile, 
 							   MediaRecorder.AudioSource.DEFAULT, 
 							   MediaRecorder.VideoSource.CAMERA, 
@@ -196,9 +197,8 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		PreviewRecorder.stopRecorder();
 		TimerController.stopTimer();
 		
-		start.setVisibility(View.VISIBLE);
-		help.setVisibility(View.VISIBLE);
-		startTrialMessage.setVisibility(View.VISIBLE);
+		Start.setVisibility(View.VISIBLE);
+		Help.setVisibility(View.VISIBLE);
 		spinningcircle.setVisibility(View.GONE);
 	}
 	
@@ -222,7 +222,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	@Override
 	public void onPause() {
 		super.onPause();
-		notify.setVisibility(View.GONE);
+		Notify.setVisibility(View.GONE);
 	
 		// When paused, release the recorder and delete the video file
 		if (!PreviewRecorder.isNull()) {
@@ -237,9 +237,20 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	@Override
 	public void onResume() {
 		super.onResume();
-		//stop.setEnabled(false);
-		PreviewRecorder.initializeCamera(this);
-		Log.v(CLASSTAG, "In Resumed");
+		
+		// Always Check that user is connected to the Internet
+		networkCheck();
+		
+		try {
+			PreviewRecorder.initializeCamera(this);
+			Log.v(CLASSTAG, "In Resumed");
+		}
+		catch(Exception e) {
+			Builder failed = new Builder(this);
+			failed.setMessage("Failed to Initialize Camera. Please check that your camera is working!");
+			failed.setPositiveButton("Ok", null);
+			failed.show();
+		}
 	}
 	
 	@Override
@@ -313,7 +324,17 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 				
 				if (FinishedTrial) {
 					stop();
-					new UploadFile().execute("LegitVideo", videoData.getPath());
+					
+					SharedPreferences shp = getSharedPreferences("com.example.autismdiagnose.app", 
+																 Context.MODE_PRIVATE);
+					
+					// The number of videos the usler records is stored in this variable in
+					// SharedPrefrences.
+					VideoNumber = shp.getInt("VIDEONUMBER", 0);
+					VideoNumber ++;
+					shp.edit().putInt("VIDEONUMBER", VideoNumber).commit();
+					
+					new UploadFile().execute(PhoneNumber + "_" + VideoNumber, videoData.getPath());
 				}
 		}
 		};
@@ -349,16 +370,62 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	    return activeNetworkInfo != null && activeNetworkInfo.isConnected();
 	}
 	
+	private void networkCheck() {
+		// The user must have the internet on. If not, quit the application
+		if (!isNetworkAvailable()) {
+			Builder builder = new Builder(this);
+			builder.setMessage("You are not connected to the Internet!");
+			builder.setPositiveButton("Ok", null);
+			
+			AlertDialog error = builder.create();
+			error.setOnDismissListener(new DialogInterface.OnDismissListener() {
+				@Override
+				public void onDismiss(final DialogInterface dialog) {
+					killApp();
+				}
+			});
+			
+			error.show();
+		}
+	}
+	
+	/**
+	 * This Method attempts to retrieve the phoneNumber and handles the case
+	 * in which a phoneNumber does not exist.
+	 */
+	private void phoneNumberCheck() {
+		// Attempt to get the phone number of this user.
+		TelephonyManager tMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+		PhoneNumber = tMgr.getLine1Number();
+		
+		if (PhoneNumber == null) {
+			Builder builder = new Builder(this);
+			builder.setMessage("A Valid Phone Number is required for you to use this app.\n" +
+							   "This is how your Trials will be identified. Please obtain \n" +
+								"a valid phone number.");
+			builder.setPositiveButton("Ok", null);
+			AlertDialog error = builder.create();
+			error.setOnDismissListener(new DialogInterface.OnDismissListener() {
+				@Override
+				public void onDismiss(final DialogInterface dialog) {
+					killApp();
+				}
+			});
+		}
+	}
+	
 	private class UploadFile extends AsyncTask<String, Integer, String> {
 	
 	     protected String doInBackground(String ... params) {
 			 String fileName = params[0];
 			 String filePath = params[1];
-			 start.setText("Uploading ...");
+			 Start.setText("Uploading ...");
 			 
 			 try {
 				 FileProcessor.Upload(fileName, filePath);
 			 } catch(Exception e) {
+				 Start.setText("Start");
+				 StartTrialMessage.setVisibility(View.VISIBLE);
 				 Builder failed = new Builder(VideoUI.this.getBaseContext());
 				 failed.setMessage("Your Upload could not go through! Make sure the Internet is on and please retry the Trial.");
 				 failed.setPositiveButton("Ok", null);
@@ -369,9 +436,11 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	     }
 
 	     protected void onPostExecute(String filePath) {
-	    	 start.setText("start");
+	    	 Start.setText("Start");
+	 		 StartTrialMessage.setVisibility(View.VISIBLE);
 	    	 TimerController.dismissDelayAfterFinish();
 	    	 
+	    	 Toast.makeText(getApplicationContext(), "File Uploaded", Toast.LENGTH_SHORT).show();
 	    	 // Delete the File from the device
 	    	 try {
 	    		 File file = new File(filePath);

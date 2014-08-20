@@ -127,6 +127,7 @@ public class TimerController {
 			public void onFinish() {
 				try {
 					// Show prompt and reset the spinning circle animation
+					DIALOGS.get("response").setCanceledOnTouchOutside(false);
 					DIALOGS.get("response").show();
 					dismissDialog();
 					SpinningCircle.arcwidth = 360;

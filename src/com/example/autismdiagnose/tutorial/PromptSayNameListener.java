@@ -32,7 +32,7 @@ public class PromptSayNameListener implements  OnShowcaseEventListener {
 		PromptAnimations pm = new PromptAnimations(activity.getApplicationContext());
 		pm.dismissNotify(notify, true);
 		
-		activity.findViewById(R.id.responseImage).setVisibility(View.VISIBLE);
+	
 		// Hide spinning circle
 		activity.findViewById(R.id.spinningcircle).setVisibility(View.GONE);
 		
@@ -44,8 +44,7 @@ public class PromptSayNameListener implements  OnShowcaseEventListener {
 
         
 		TutorialHelper th = new TutorialHelper(activity, lps);
-		ViewTarget target = new ViewTarget(R.id.responseImage, activity);
-		th.createResponsePromptHelp(target, new PromptResponseListener(activity));
+		
 	}
 
 	@Override
