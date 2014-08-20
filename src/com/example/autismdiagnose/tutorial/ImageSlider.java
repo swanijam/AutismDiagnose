@@ -25,7 +25,7 @@ public class ImageSlider{
 	public ImageSlider(Activity activity) {
 		this.activity = activity;
 		images = new int [] {R.id.slide_2, R.id.slide_3, R.id.slide_4, R.id.slide_5, 
-				 R.id.slide_6, R.id.slide_7, R.id.slide_8, R.id.slide_9, R.id.slide_10};
+				 R.id.slide_6, R.id.slide_7, R.id.slide_8, R.id.slide_9, R.id.slide_10, R.id.slide_1};
 	}
 	
 	public void switchImage(final Context context, final ImageView fromView, final ImageView toView) {
@@ -57,7 +57,7 @@ public class ImageSlider{
 					Button finish = (Button) activity.findViewById(R.id.startTut);
 					finish.setVisibility(View.VISIBLE);
 					finish.setText("Replay");
-					activity.findViewById(R.id.finish).setVisibility(View.VISIBLE);
+					activity.findViewById(R.id.finish).setVisibility(View.VISIBLE); 
 				}
 			}
 		};
@@ -66,8 +66,9 @@ public class ImageSlider{
 	}
 	
 	public void reset() {
+		slideNum = 0;
 		// hide the # 2 slide that is not included in the array.
-		for (int i=0; i< images.length; i++) {
+		for (int i=0; i< images.length - 1; i++) {
 			activity.findViewById(images[i]).setVisibility(View.GONE);
 		}
 	}

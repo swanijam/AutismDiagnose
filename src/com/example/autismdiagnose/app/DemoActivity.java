@@ -79,6 +79,7 @@ public class DemoActivity extends Activity {
 
 	public void startSlides(View v) {
 		v.setVisibility(View.GONE);
+		findViewById(R.id.finish).setVisibility(View.GONE);
 		ImageSlider is = new ImageSlider(this);
 		is.reset();
 		is.switchImage(getApplicationContext(), 
