@@ -31,9 +31,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.Upload;
 import com.example.autismdiagnose.R;
 import com.example.autismdiagnose.android_helpers.FileProcessor;
 import com.example.autismdiagnose.android_helpers.SpinningCircle;
+import com.example.autismdiagnose.android_helpers.Util;
 import com.example.autismdiagnose.video_helper.AndroidPreviewRecorder;
 import com.example.autismdiagnose.video_helper.Response;
 import com.example.autismdiagnose.video_helper.TimerController;
@@ -86,6 +89,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	// how many videos the user has uploaded so far in order to properly
 	// name the videos uploaded to the server.
 	private int VideoNumber;
+	private TransferManager tm;
 	
 	private boolean FinishedTrial = false;
 	
@@ -334,7 +338,8 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 					VideoNumber ++;
 					shp.edit().putInt("VIDEONUMBER", VideoNumber).commit();
 					
-					new UploadFile().execute(PhoneNumber + "_" + VideoNumber, videoData.getPath());
+					Start.setText("Uploading ...");
+					new UploadFile().execute("TestVID" + "_" + VideoNumber + ".mp4", videoData.getPath());
 				}
 		}
 		};
@@ -414,38 +419,49 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		}
 	}
 	
-	private class UploadFile extends AsyncTask<String, Integer, String> {
+	private class UploadFile extends AsyncTask<String, Integer, String[]> {
 	
-	     protected String doInBackground(String ... params) {
-			 String fileName = params[0];
-			 String filePath = params[1];
-			 Start.setText("Uploading ...");
-			 
+	     protected String[] doInBackground(String ... params) {
 			 try {
-				 FileProcessor.Upload(fileName, filePath);
-			 } catch(Exception e) {
-				 Start.setText("Start");
-				 StartTrialMessage.setVisibility(View.VISIBLE);
-				 Builder failed = new Builder(VideoUI.this.getBaseContext());
-				 failed.setMessage("Your Upload could not go through! Make sure the Internet is on and please retry the Trial.");
-				 failed.setPositiveButton("Ok", null);
-				 failed.show();
+			 	tm = new TransferManager(Util.getCredProvider(VideoUI.this));		 
+			 }
+			 catch (Exception e) {
+				failedUpload();
 			 }
 			 
-	    	 return filePath;
+	    	return params;
 	     }
 
-	     protected void onPostExecute(String filePath) {
-	    	 Start.setText("Start");
-	 		 StartTrialMessage.setVisibility(View.VISIBLE);
-	    	 TimerController.dismissDelayAfterFinish();
-	    	 
-	    	 Toast.makeText(getApplicationContext(), "File Uploaded", Toast.LENGTH_SHORT).show();
-	    	 // Delete the File from the device
-	    	 try {
-	    		 File file = new File(filePath);
-	    		 file.delete();
-	    	 } catch (Exception e) {}
+	     protected void onPostExecute(String [] result) {
+	 	 	try {
+				String fileName = result[0];
+				String filePath = result[1];
+			
+				File file = new File(filePath);
+				file.createNewFile();
+				Upload mUpload = tm.upload(
+						Constants.BUCKET_NAME,
+						fileName,
+						file);
+				
+				while (mUpload.isDone() == false && isNetworkAvailable()) {
+					Log.d("Uploading", String.valueOf(mUpload.getProgress().getPercentTransferred()) + "%");
+				}
+				
+				Start.setText("Start Trial");
+				Start.setEnabled(true);
+			}
+			catch (Exception e) {
+				failedUpload();	
+			}
+	     }
+	     
+	     protected void failedUpload() {
+			 Builder failed = new Builder(VideoUI.this);
+			 failed.setMessage("Upload Failed! Please check your Internet connection and retry the trial!");
+			 failed.setPositiveButton("Ok", null);
+			 Start.setText("Start Trial");
+			 Start.setEnabled(true);
 	     }
 	 }
 }

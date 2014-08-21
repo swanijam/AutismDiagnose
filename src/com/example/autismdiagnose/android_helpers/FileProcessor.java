@@ -18,7 +18,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
-import com.readystatesoftware.simpl3r.Uploader;
+//import com.readystatesoftware.simpl3r.Uploader;
 
 import android.app.Activity;
 import android.content.Context;
@@ -41,7 +41,7 @@ public class FileProcessor {
 		
 		File file = new File(filePath);
 		// Create an amazon uploader
-		Uploader uploader = new Uploader(context, s3Client, "AutismDiagnose", fileName, file);
+		//Uploader uploader = new Uploader(context, s3Client, "AutismDiagnose", fileName, file);
 	}
 	
 	
