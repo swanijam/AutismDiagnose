@@ -1,5 +1,7 @@
 package com.example.autismdiagnose.video_helper;
 
+import java.util.ArrayList;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -8,43 +10,26 @@ public class Response {
 	private String path;
 	private boolean NO_RESPONSE = false;
 	private DateTime start_time;
-	private DateTime trial_1_time;
-	private DateTime trial_2_time;
-	private DateTime trial_3_time;
+	private ArrayList<DateTime> trial_times;
 	
 	public Response(String path) {
 		this.path = path;
 		start_time = getCurrentTime();
+		trial_times = new ArrayList<DateTime>();
 	}
 
 	public String getPath() {
 		return path;
 	}
 	
-	public DateTime getTrial_1_time() {
-		return trial_1_time;
+	public void addTime() {
+		trial_times.add(getCurrentTime());
 	}
-
-	public void setTrial_1_time() {
-		this.trial_1_time = getCurrentTime();
+	
+	public void getTime(int index) {
+		trial_times.get(index);
 	}
-
-	public DateTime getTrial_2_time() {
-		return trial_2_time;
-	}
-
-	public void setTrial_2_time() {
-		this.trial_2_time = getCurrentTime();
-	}
-
-	public DateTime getTrial_3_time() {
-		return trial_3_time;
-	}
-
-	public void setTrial_3_time() {
-		this.trial_3_time = getCurrentTime();
-	}
-
+	
 	public void setNoResponse(boolean resp) {
 		this.NO_RESPONSE = resp;
 	}
@@ -56,5 +41,9 @@ public class Response {
 	public DateTime getCurrentTime(){
 		DateTime datetime = new DateTime(DateTimeZone.UTC);
 		return datetime;
+	}
+	
+	public void writeTimes() {
+		
 	}
 }

@@ -25,7 +25,7 @@ public class ImageSlider{
 	public ImageSlider(Activity activity) {
 		this.activity = activity;
 		images = new int [] {R.id.slide_2, R.id.slide_3, R.id.slide_4, R.id.slide_5, 
-				 R.id.slide_6, R.id.slide_7, R.id.slide_8, R.id.slide_9, R.id.slide_10, R.id.slide_1};
+				 R.id.slide_6, R.id.slide_7, R.id.slide_8, R.id.slide_9, R.id.slide_10, R.id.slide_0};
 	}
 	
 	public void switchImage(final Context context, final ImageView fromView, final ImageView toView) {

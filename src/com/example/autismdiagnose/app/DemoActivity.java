@@ -3,10 +3,6 @@ package com.example.autismdiagnose.app;
 import com.example.autismdiagnose.R;
 import com.example.autismdiagnose.android_helpers.SpinningCircle;
 import com.example.autismdiagnose.tutorial.ImageSlider;
-import com.example.autismdiagnose.tutorial.TimerTutorialListener;
-import com.example.autismdiagnose.tutorial.TutorialHelper;
-import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -27,8 +23,6 @@ import android.widget.ImageView;
  */
 public class DemoActivity extends Activity {
 
-	ShowcaseView Sv;
-	TutorialHelper Tutorial;
 	Button Start;
 	SpinningCircle Sc;
 	SharedPreferences Prefs;
@@ -51,6 +45,8 @@ public class DemoActivity extends Activity {
 			switchToVideoAndDestroy();
 		}
 		else {
+			switchToPagerTutorial();
+			/*
 			Button startTut = (Button) findViewById(R.id.startTut);
 			Button finishTut = (Button) findViewById(R.id.finish);
 			
@@ -67,10 +63,11 @@ public class DemoActivity extends Activity {
 					switchToVideoAndDestroy();
 				}
 			});
+			*/
 		}
 	}
 
-	public void startSlides(View v) {
+	/*public void startSlides(View v) {
 		v.setVisibility(View.GONE);
 		findViewById(R.id.finish).setVisibility(View.GONE);
 		ImageSlider is = new ImageSlider(this);
@@ -78,17 +75,11 @@ public class DemoActivity extends Activity {
 		is.switchImage(getApplicationContext(), 
 				(ImageView) findViewById(R.id.slide_1), (ImageView) findViewById(R.id.slide_2));
 	}
-	
-	public void onClick(View view) {
-		if (view.getId() == Start.getId()) {
-			Tutorial.hideHelp();
-			Start.setVisibility(View.GONE);
-			Sc.setVisibility(View.VISIBLE);
-			
-			ViewTarget target = new ViewTarget(R.id.spinningcircle, this);
-			Tutorial.createTimerHelp(target, new TimerTutorialListener(this));
-			Tutorial.showHelp();
-		}
+	*/
+	public void switchToPagerTutorial() {
+		Intent pagerTutorial = new Intent(this, PagerTutorialActivity.class);
+		startActivity(pagerTutorial);
+		finish();
 	}
 
 	public void switchToVideoAndDestroy() {
@@ -104,17 +95,5 @@ public class DemoActivity extends Activity {
 		}
 		startActivity(videoUI);
 		finish();
-	}
-	
-	@Override
-	public void onResume() {
-		super.onResume();
-		//startCamera(this);
-	}
-	
-	@Override 
-	public void onPause() {
-		super.onPause();
-		//handlePause();
 	}
 }

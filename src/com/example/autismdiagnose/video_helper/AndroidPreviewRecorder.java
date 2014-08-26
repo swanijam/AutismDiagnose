@@ -69,7 +69,7 @@ OnInfoListener, OnErrorListener {
 		camera = null;
 	}
 	
-	public void startCameraPreview(Activity activity, SurfaceHolder holder) throws IOException {
+	public void startCameraPreview(Activity activity, SurfaceHolder holder) throws Exception {
 		camera.setPreviewDisplay(holder);
 		setCameraDisplayOrientation(activity, Camera.CameraInfo.CAMERA_FACING_FRONT, camera);
 		camera.startPreview();

@@ -33,19 +33,6 @@ public class FileProcessor {
 	
 	public static ArrayList<String> videos = new ArrayList<String>();
 	
-	
-	public static void FileUpload(String fileName, String filePath, Context context) {
-		AmazonS3Client s3Client = new AmazonS3Client(
-				new BasicAWSCredentials("AKIAJDZ6WYRV24WOIIOA",
-										"3fuG2mdBS88Q2YlziY5XYdlTAaipztV6GyKEPz7A"));
-		
-		File file = new File(filePath);
-		// Create an amazon uploader
-		//Uploader uploader = new Uploader(context, s3Client, "AutismDiagnose", fileName, file);
-	}
-	
-	
-	
 	public static void Upload(String fileName, String filePath) throws Exception{
 		  String existingBucketName = "AutismDiagnose";
 		  String amazonFileUploadLocationOriginal=existingBucketName;
@@ -65,7 +52,7 @@ public class FileProcessor {
 		  s3Client.putObject(putObjectRequest);
 
 	}
-	
+		
 	public static boolean write_append(Activity activity, String data, String path) {
 		FileWriter writer;
 			

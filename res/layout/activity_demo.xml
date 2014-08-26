@@ -9,64 +9,66 @@
     tools:ignore="MergeRootFrame" >
 
     <ImageView
-        android:id="@+id/slide_1"
+        android:id="@+id/slide_0"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/tutorial_start_tut" />
+        android:visibility="gone"
+        android:src="@drawable/tutorial_0" />
+    
     <ImageView
         android:id="@+id/slide_2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:src="@drawable/tutorial_say_name" />
+        android:src="@drawable/tutorial_2" />
     <ImageView
         android:id="@+id/slide_3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:src="@drawable/tutorial_did_he_respond" />
+        android:src="@drawable/tutorial_3" />
     <ImageView
         android:id="@+id/slide_4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:src="@drawable/tutorial_response_no" />
+        android:src="@drawable/tutorial_4" />
     <ImageView
         android:id="@+id/slide_5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:src="@drawable/tutorial_say_name" />
+        android:src="@drawable/tutorial_2" />
 	<ImageView
         android:id="@+id/slide_6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:src="@drawable/tutorial_did_he_respond" />
+        android:src="@drawable/tutorial_3" />
     <ImageView
         android:id="@+id/slide_7"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:src="@drawable/tutorial_response_no" />
+        android:src="@drawable/tutorial_4" />
     <ImageView
         android:id="@+id/slide_8"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:src="@drawable/tutorial_say_name" />
+        android:src="@drawable/tutorial_2" />
     <ImageView
         android:id="@+id/slide_9"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:src="@drawable/tutorial_did_he_respond_yes" />
+        android:src="@drawable/tutorial_5" />
     <ImageView
         android:id="@+id/slide_10"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:src="@drawable/tutorial_response_yes" />
+        android:src="@drawable/tutorial_6" />
     
     <Button
         android:id="@+id/startTut"

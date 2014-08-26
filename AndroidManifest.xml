@@ -49,6 +49,10 @@
         <activity
             android:name=".app.DemoActivity"
             android:label="@string/title_activity_demo" >
+        </activity>
+        <activity
+            android:name=".app.PagerTutorialActivity"
+            android:label="pagertutorialactivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

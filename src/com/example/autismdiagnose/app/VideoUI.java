@@ -159,11 +159,10 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	}
 	
 	public void onClick(View view) {
-		
 		if(view.getId() == Start.getId())
 			start();
 		else if (view.getId() == Help.getId()) {
-			Intent tutscreen = new Intent(this, DemoActivity.class);
+			Intent tutscreen = new Intent(this, PagerTutorialActivity.class);
 			tutscreen.putExtra("HELP", true);
 			startActivity(tutscreen);
 		}
@@ -190,11 +189,24 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		spinningcircle.setVisibility(View.VISIBLE);
 	}
 	
-	
 	// Method for Killing the application completely. Done if the Internet connection is not on.
 	public void killApp() {
 		this.finish();
 		android.os.Process.killProcess( android.os.Process.myPid() ); 
+	}
+	
+	public void showErrorDialog() {
+		Builder failed = new Builder(this);
+		failed.setMessage("Failed to Initialize Camera. Please check that your camera is working." +
+						  "Try restarting your phone.");
+		failed.setPositiveButton("Ok", new DialogInterface.OnClickListener() {		
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				killApp();
+			}
+		});
+		failed.show();
+		failed.setCancelable(false);
 	}
 	
 	public void stop() {
@@ -217,9 +229,8 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		try {
 			PreviewRecorder.startCameraPreview(this, holder);
 		}
-		catch (IOException e) {
-			Log.v(CLASSTAG, "Could not start the preview");
-				e.printStackTrace();
+		catch (Exception e) {
+			showErrorDialog();
 		}
 	}
 	
@@ -244,16 +255,12 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		
 		// Always Check that user is connected to the Internet
 		networkCheck();
-		
 		try {
 			PreviewRecorder.initializeCamera(this);
-			Log.v(CLASSTAG, "In Resumed");
+			Log.i(CLASSTAG, "App Resumed Sucessfully");
 		}
 		catch(Exception e) {
-			Builder failed = new Builder(this);
-			failed.setMessage("Failed to Initialize Camera. Please check that your camera is working!");
-			failed.setPositiveButton("Ok", null);
-			failed.show();
+			showErrorDialog();
 		}
 	}
 	
@@ -297,30 +304,32 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 					PreviewRecorder.addVideoData(videoData);
 					TimerController.showDelayAfterFinishTimer();
 					FinishedTrial = true;
+					Log.i(CLASSTAG, "Clicked Positive");
 				}
 				else if (which == Dialog.BUTTON_NEGATIVE) {
 					if (TrialNumber < 3){
 						spinningcircle.setVisibility(View.VISIBLE);
 						TrialNumber += 1;
 						TimerController.startCountDownResponseTimer(TrialNumber);
+						Log.i(CLASSTAG, "Clicked Negative");
 					}
 				}
 				else if(which == Dialog.BUTTON_NEUTRAL) {
 					stop();
 					TimerController.stopTimer();
 					TimerController.showRestartMessage();
-					Log.v("NU", "NUTREAL");
+					Log.i(CLASSTAG, "Clicked Neutral");
 				}
 				
 				if (TrialNumber == 1) {
-					videoData.setTrial_1_time();
+					videoData.addTime();
 				}
 				else if (TrialNumber == 2) {
-					videoData.setTrial_2_time();
+					videoData.addTime();
 				}
 				else if (TrialNumber == 3) {
+					videoData.addTime();
 					spinningcircle.setVisibility(View.GONE);
-					videoData.setTrial_3_time();
 					PreviewRecorder.addVideoData(videoData);
 					FinishedTrial = true;
 					TimerController.showDelayAfterFinishTimer();
