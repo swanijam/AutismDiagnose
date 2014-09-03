@@ -28,7 +28,8 @@
         </activity>
         <activity
             android:name=".app.VideoUI"
-            android:label="@string/title_activity_video_ui" >
+            android:label="@string/title_activity_video_ui"
+            android:screenOrientation="portrait" >
         </activity>
         <activity
             android:name=".app.TutorialVideo"
@@ -48,16 +49,16 @@
         </activity>
         <activity
             android:name=".app.DemoActivity"
-            android:label="@string/title_activity_demo" >
-        </activity>
-        <activity
-            android:name=".app.PagerTutorialActivity"
-            android:label="pagertutorialactivity" >
+            android:label="AN recognition" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".app.PagerTutorialActivity"
+            android:label="pagertutorialactivity" >
         </activity>
         <activity
             android:name=".MainActivity"

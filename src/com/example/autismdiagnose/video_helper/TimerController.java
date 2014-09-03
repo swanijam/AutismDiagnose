@@ -181,7 +181,7 @@ public class TimerController {
 		Animation FadeIn = AnimationUtils.loadAnimation(Context, R.anim.fade_in);
 		TEXTVIEWS.get("restart").startAnimation(FadeIn);
 		start.setEnabled(false);
-		CurrentTimer = new CountDownTimer(1500, 1000) {
+		CurrentTimer = new CountDownTimer(3000, 1000) {
 			@Override
 			public void onTick(long mills) {
 			}
@@ -190,6 +190,7 @@ public class TimerController {
 				Animation FadeOut = AnimationUtils.loadAnimation(Context, R.anim.fade_out);
 				TEXTVIEWS.get("restart").startAnimation(FadeOut);
 				TEXTVIEWS.get("restart").setVisibility(View.GONE);
+				TEXTVIEWS.get("startTrialMessage").setVisibility(View.VISIBLE);
 				start.setEnabled(true);
 			}
 		}.start();

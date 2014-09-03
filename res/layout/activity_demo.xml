@@ -7,88 +7,35 @@
     android:layout_height="match_parent"
     tools:context="com.example.webviewapp.MainActivity"
     tools:ignore="MergeRootFrame" >
-
-    <ImageView
-        android:id="@+id/slide_0"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:src="@drawable/tutorial_0" />
     
-    <ImageView
-        android:id="@+id/slide_2"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/email_details"
+        android:layout_width="match_parent"
+        android:layout_marginTop="10dp"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:src="@drawable/tutorial_2" />
-    <ImageView
-        android:id="@+id/slide_3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:src="@drawable/tutorial_3" />
-    <ImageView
-        android:id="@+id/slide_4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:src="@drawable/tutorial_4" />
-    <ImageView
-        android:id="@+id/slide_5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:src="@drawable/tutorial_2" />
-	<ImageView
-        android:id="@+id/slide_6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:src="@drawable/tutorial_3" />
-    <ImageView
-        android:id="@+id/slide_7"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:src="@drawable/tutorial_4" />
-    <ImageView
-        android:id="@+id/slide_8"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:src="@drawable/tutorial_2" />
-    <ImageView
-        android:id="@+id/slide_9"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:src="@drawable/tutorial_5" />
-    <ImageView
-        android:id="@+id/slide_10"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:src="@drawable/tutorial_6" />
+        android:layout_gravity="top|center"
+        android:gravity="center|center"
+        android:textSize="20dp"
+        android:text="Please enter your email address. It will be used as a unique Username (We will not give out your email or contact you.)" />
     
-    <Button
-        android:id="@+id/startTut"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="100dp"
+    <EditText
+        android:id="@+id/email_address"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
+        android:layout_marginTop="90dp"
+        android:layout_gravity="top|center"
+        android:hint="Enter a valid email"
+        android:inputType="textEmailAddress"
+        />
+    
+    <Button 
+        android:id="@+id/confirm"
+        android:layout_width= "match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="top|center"
+        android:layout_marginTop="130dp"
+        android:text="Confirm"
+        android:textColor="#FFFFFF"
         android:background="@drawable/btn_default_green"
-        android:textColor="#FFFFFF"
-        android:text="Start!" />
-    
-    <Button
-        android:id="@+id/finish"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="100dp"
-        android:visibility="gone"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|left"
-        android:background="@drawable/btn_default_holo_light"
-        android:textColor="#FFFFFF"
-        android:text="Finish" />
-    
+        />
 </FrameLayout>

@@ -2,18 +2,21 @@ package com.example.autismdiagnose.app;
 
 import com.example.autismdiagnose.R;
 import com.example.autismdiagnose.android_helpers.SpinningCircle;
-import com.example.autismdiagnose.tutorial.ImageSlider;
-
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.EditText;
 
 /**
  @author Sheik Hassan
@@ -44,38 +47,54 @@ public class DemoActivity extends Activity {
 		if (completedTutorial && bundle == null) {
 			switchToVideoAndDestroy();
 		}
+		// If the user is using the app for the first time
 		else {
-			switchToPagerTutorial();
-			/*
-			Button startTut = (Button) findViewById(R.id.startTut);
-			Button finishTut = (Button) findViewById(R.id.finish);
+			final EditText emailAddress = (EditText) findViewById(R.id.email_address);
+			final Button confirm = (Button) findViewById(R.id.confirm);
+			confirm.setEnabled(false);
 			
-			startTut.setOnClickListener(new OnClickListener() {
+			// Upon clicking confirm, the user is sent to the tutorial
+			confirm.setOnClickListener( new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					startSlides(v);
+					Prefs.edit().putString("EMAIL_ADDRESS", emailAddress.getText().toString()).commit();
+					switchToPagerTutorial();
 				}
 			});
 			
-			finishTut.setOnClickListener(new OnClickListener() {
+			// Verify the email when the user types it in. If the email is valid
+			// then the confirm button is enabled. Else, the button cannot be clicked.
+			emailAddress.addTextChangedListener(new TextWatcher() {
 				@Override
-				public void onClick(View v) {
-					switchToVideoAndDestroy();
+				public void afterTextChanged(Editable finalText) {
+					if (isValidEmail(finalText.toString())) {
+						confirm.setEnabled(true);
+						Log.v("Button", "enabled");
+					}
+					else {
+						Log.v("Button", "disabled");
+						confirm.setEnabled(false);
+					}	
 				}
+
+				@Override
+				public void beforeTextChanged(CharSequence arg0, int arg1,
+						int arg2, int arg3) {}
+				@Override
+				public void onTextChanged(CharSequence arg0, int arg1,
+						int arg2, int arg3) {}
 			});
-			*/
-		}
+		}	
 	}
 
-	/*public void startSlides(View v) {
-		v.setVisibility(View.GONE);
-		findViewById(R.id.finish).setVisibility(View.GONE);
-		ImageSlider is = new ImageSlider(this);
-		is.reset();
-		is.switchImage(getApplicationContext(), 
-				(ImageView) findViewById(R.id.slide_1), (ImageView) findViewById(R.id.slide_2));
-	}
-	*/
+	public boolean isValidEmail(String target) {
+	    if (target == null) {
+	    	return false;
+	    } else {
+	    	return android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+	    }
+	} 
+	
 	public void switchToPagerTutorial() {
 		Intent pagerTutorial = new Intent(this, PagerTutorialActivity.class);
 		startActivity(pagerTutorial);

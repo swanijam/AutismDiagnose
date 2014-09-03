@@ -9,6 +9,7 @@ import com.example.autismdiagnose.android_helpers.FileProcessor;
 import android.app.Activity;
 import android.graphics.Color;
 import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnErrorListener;
@@ -25,6 +26,7 @@ OnInfoListener, OnErrorListener {
 	private MediaRecorder recorder;
 	private ArrayList<Response> VideoList = new ArrayList<Response>();
 	
+	public static boolean isRecording = false;
 	private final String CLASSTAG = "AndroidPreviewRecorder";
 	
 	public AndroidPreviewRecorder(Camera camera, MediaRecorder recorder) {
@@ -42,11 +44,11 @@ OnInfoListener, OnErrorListener {
 	 */
 	public boolean initializeCamera(Activity activity) {
 		if (camera != null) return true;
-		
 		try {
 			camera = Camera.open();
 			Camera.Parameters camParams = camera.getParameters();
 			camera.lock();
+			Log.v("Started", "CAMERA AGAIN");
 		}
 		catch(RuntimeException re){
 			Log.v(CLASSTAG, "Failed to initialize camera");
@@ -95,6 +97,8 @@ OnInfoListener, OnErrorListener {
 		try {
 			// If a preview is going on, stop it and unlock the camera
 			camera.stopPreview();
+			Parameters params = camera.getParameters();
+			camera.setParameters(params);
 			camera.unlock();
 			
 			// Create a new recorder and set its source as the phone camera.
@@ -106,11 +110,13 @@ OnInfoListener, OnErrorListener {
 			
 			// Set the video quality
 				CamcorderProfile profile = CamcorderProfile.get(QUALITY);
+				profile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
+
 			recorder.setProfile(profile);
-			recorder.setPreviewDisplay(holder.getSurface());
 			recorder.setOutputFile(outputPath);
-			Log.v(CLASSTAG, "Recorder Initialized!");
-			recorder.prepare();
+			
+			recorder.setOrientationHint(90); // 90 degrees
+			prepareRecorder(holder);
 		}
 		catch(Exception e) {
 			Log.v(CLASSTAG, "Failed to initialize Recorder");
@@ -118,6 +124,20 @@ OnInfoListener, OnErrorListener {
 		}	
 	
 	}
+	
+	private void prepareRecorder(SurfaceHolder holder) {
+        recorder.setPreviewDisplay(holder.getSurface());
+        try {
+            recorder.prepare();
+			Log.v(CLASSTAG, "Recorder Initialized!");
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }
+    }
 	
 	public void startRecorder() throws IllegalStateException {
 		recorder.setOnInfoListener(this);
@@ -140,18 +160,21 @@ OnInfoListener, OnErrorListener {
 		
 		initializeRecorder(activity, holder, outputPath, AUDIOSOURCE, VIDEOSOURCE, QUALITY);
 		startRecorder();
+		isRecording = true;
 	}
 	
 	public void stopRecorder() {
 		if(recorder != null) {
 			try {
 				recorder.stop();
+				recorder.reset();
 				releaseRecorder();
 			}
 			catch(IllegalStateException e) {
 				Log.e(CLASSTAG, "Recorder BADDDDDD");
 			}	
 		}
+		isRecording = false;
 	}
 	
 	public void releaseRecorder() {
@@ -159,6 +182,7 @@ OnInfoListener, OnErrorListener {
 			recorder.release();
 			recorder = null;
 		}
+		isRecording = false;
 	}
 	
 	// TODO add a feature to allow the recorder to wait a certain amount
@@ -172,6 +196,7 @@ OnInfoListener, OnErrorListener {
 	
 	public void setCameraDisplayOrientation(Activity activity,
 	         int cameraId, android.hardware.Camera camera) {
+		 Log.v("Changed Orientation", "SUCCESSFUL!");
 	     android.hardware.Camera.CameraInfo info =
 	             new android.hardware.Camera.CameraInfo();
 	     android.hardware.Camera.getCameraInfo(cameraId, info);

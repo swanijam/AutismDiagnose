@@ -20,6 +20,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -27,6 +28,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -63,6 +65,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	
 	private Button Help;
 	private Button Start;
+	private ProgressBar progress;
 	
 	private VideoView VideoView;
 	private SurfaceHolder Holder;
@@ -78,7 +81,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	// Response to ask the user if the child responded (Yes, No)
 	private Builder ResponseBuilder;
 		
-	private static final int RECORDINGLIMIT = 5000;
+	private static final int RECORDINGLIMIT = 3000;
 	
 	// Every new trial prompts the user 3 times to call the childs name
 	// and 3 times to input if he/she responded or not. This variable is
@@ -156,6 +159,9 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		AlertDialog waitout = setWaitOutDialogListener();
 		TimerController.setDialog("response", response);
 		TimerController.setDialog("waitout", waitout);
+		
+		// Get the progressbar
+		progress = (ProgressBar) findViewById(R.id.progressbar);
 	}
 	
 	public void onClick(View view) {
@@ -177,13 +183,15 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		
 		// Start a new recording session
 		String outputFile = getFilesDir() + "/trials0.mp4";
-		videoData = new Response(outputFile);
+		videoData = new Response(outputFile, this);
+		// Add the start time
+		videoData.addTime();
 		
 		PreviewRecorder.record(this, Holder, 
 							   outputFile, 
 							   MediaRecorder.AudioSource.DEFAULT, 
 							   MediaRecorder.VideoSource.CAMERA, 
-							   CamcorderProfile.QUALITY_LOW);
+							   CamcorderProfile.QUALITY_480P);
 		
 		TimerController.startCountDownResponseTimer(TrialNumber);
 		spinningcircle.setVisibility(View.VISIBLE);
@@ -192,7 +200,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	// Method for Killing the application completely. Done if the Internet connection is not on.
 	public void killApp() {
 		this.finish();
-		android.os.Process.killProcess( android.os.Process.myPid() ); 
+		android.os.Process.killProcess( android.os.Process.myPid()); 
 	}
 	
 	public void showErrorDialog() {
@@ -216,6 +224,9 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		Start.setVisibility(View.VISIBLE);
 		Help.setVisibility(View.VISIBLE);
 		spinningcircle.setVisibility(View.GONE);
+		
+		// Reset the arcwidth
+		spinningcircle.arcwidth = 360;
 	}
 	
 	/**
@@ -234,34 +245,58 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		}
 	}
 	
-	@Override
-	public void onPause() {
-		super.onPause();
+	public void Pause() {
 		Notify.setVisibility(View.GONE);
-	
+		
 		// When paused, release the recorder and delete the video file
 		if (!PreviewRecorder.isNull()) {
 			stop();
+			PreviewRecorder.releaseRecorder();
+			PreviewRecorder.releaseCamera();
+			FileProcessor.DeleteFile(getFilesDir() + "/trials0.mp4");
+			Log.v("Doin all de stuff", "soon");
 		}
-		else PreviewRecorder.releaseRecorder();
+		else {
+			PreviewRecorder.releaseRecorder();
+			PreviewRecorder.releaseCamera();
+		}	
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		Log.v(CLASSTAG, "APP PAUSED");
+		Pause();
+	}
+	
+	@Override
+	public void onStop() {
+		super.onStop();
+		Log.v(CLASSTAG, "APP STOPPED");
 		
-		FileProcessor.DeleteFile(getFilesDir() + "/trials0.mp4");
-			
+		// Kill the app if user presses the power button and turns off the screen.
+		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		if (!pm.isScreenOn()) {
+			//killApp();
+		}
 	}
 	
 	@Override
 	public void onResume() {
 		super.onResume();
-		
+		Log.v(CLASSTAG, "APP RESUMED");
 		// Always Check that user is connected to the Internet
 		networkCheck();
 		try {
 			PreviewRecorder.initializeCamera(this);
+			PreviewRecorder.startCameraPreview(this, Holder);
 			Log.i(CLASSTAG, "App Resumed Sucessfully");
 		}
 		catch(Exception e) {
 			showErrorDialog();
 		}
+		
+		findViewById(R.id.startTrialMessage).setVisibility(View.VISIBLE);
 	}
 	
 	@Override
@@ -276,7 +311,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
 			stop();
 			FileProcessor.DeleteFile(getFilesDir() + "/trials0.mp4");
-			videoData = new Response(null);
+			videoData = new Response(null, null);
 			videoData.setNoResponse(true);
 			PreviewRecorder.addVideoData(videoData);
 		}		
@@ -338,9 +373,11 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 				if (FinishedTrial) {
 					stop();
 					
-					SharedPreferences shp = getSharedPreferences("com.example.autismdiagnose.app", 
+					SharedPreferences shp = getSharedPreferences("com.example.autismdiagnose", 
 																 Context.MODE_PRIVATE);
 					
+					// The unique identifier of the video
+					String videoName = shp.getString("EMAIL_ADDRESS", "anonymous@unknown.com");
 					// The number of videos the usler records is stored in this variable in
 					// SharedPrefrences.
 					VideoNumber = shp.getInt("VIDEONUMBER", 0);
@@ -348,9 +385,9 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 					shp.edit().putInt("VIDEONUMBER", VideoNumber).commit();
 					
 					Start.setText("Uploading ...");
-					new UploadFile().execute("TestVID" + "_" + VideoNumber + ".mp4", videoData.getPath());
+					new UploadFile().execute(videoName + "_" + VideoNumber + ".mp4", videoData.getPath());
 				}
-		}
+			}
 		};
 		
 		// Show the dialog and determine if there was a response
@@ -367,7 +404,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		ResponseBuilder.setMessage("We're Sorry! You did not respond so we discarded your trial!")
 		.setPositiveButton("Ok! Let's Retry", null);
 			return ResponseBuilder.create();
-		}
+	}
 	
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
@@ -440,6 +477,12 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 			 
 	    	return params;
 	     }
+	     
+	     protected void onProgressUpdate(Integer... progress) {
+	    	 Log.v("SHITTT", progress[0] + "");
+	         Start.setText("Uploading " + progress[0] + "%");
+	     }
+
 
 	     protected void onPostExecute(String [] result) {
 	 	 	try {
@@ -454,7 +497,8 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 						file);
 				
 				while (mUpload.isDone() == false && isNetworkAvailable()) {
-					Log.d("Uploading", String.valueOf(mUpload.getProgress().getPercentTransferred()) + "%");
+					progress.setProgress((int) mUpload.getProgress().getPercentTransferred());
+					//Log.d("Uploading", String.valueOf(mUpload.getProgress().getPercentTransferred()) + "%");
 				}
 				
 				Start.setText("Start Trial");
@@ -473,4 +517,47 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 			 Start.setEnabled(true);
 	     }
 	 }
+	
+	private class CompleteUpload extends AsyncTask<String, Integer, String[]> {
+
+		@Override
+		protected String[] doInBackground(String... result) {
+			try {
+				String fileName = result[0];
+				String filePath = result[1];
+			
+				File file = new File(filePath);
+				file.createNewFile();
+				Upload mUpload = tm.upload(
+						Constants.BUCKET_NAME,
+						fileName,
+						file);
+				
+				while (mUpload.isDone() == false && isNetworkAvailable()) {
+					progress.setProgress((int) mUpload.getProgress().getPercentTransferred());
+					//Log.d("Uploading", String.valueOf(mUpload.getProgress().getPercentTransferred()) + "%");
+				}
+				
+				Start.setText("Start Trial");
+				Start.setEnabled(true);
+			}
+			catch (Exception e) {
+				failedUpload();	
+			}
+			return result;
+	    }
+		
+		protected void onProgressUpdate(Integer... progress) {
+	    	 Log.v("SHITTT", progress[0] + "");
+	         Start.setText("Uploading " + progress[0] + "%");
+	    }
+		
+		protected void failedUpload() {
+			 Builder failed = new Builder(VideoUI.this);
+			 failed.setMessage("Upload Failed! Please check your Internet connection and retry the trial!");
+			 failed.setPositiveButton("Ok", null);
+			 Start.setText("Start Trial");
+			 Start.setEnabled(true);
+	     }
+		}
 }

@@ -29,6 +29,6 @@ public class SpinningCircle extends View {
 		canvas.drawArc(new RectF(10, 10, canvas.getWidth()-10, canvas.getHeight()-10), 270, -arcwidth, false, FillColor);
 		
 		
-		arcwidth -= 1.16;
+		arcwidth -= 2.10;
 	}
 }
