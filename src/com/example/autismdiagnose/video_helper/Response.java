@@ -1,6 +1,9 @@
 package com.example.autismdiagnose.video_helper;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
@@ -9,6 +12,7 @@ import org.joda.time.DateTimeZone;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 public class Response {
 
@@ -40,34 +44,56 @@ public class Response {
 	}
 
 	public DateTime getCurrentTime(){
-		DateTime datetime = new DateTime(DateTimeZone.UTC);
+		DateTime datetime = new DateTime();
 		return datetime;
 	}
 	
-	public void writeTimes() {
-		BufferedWriter writer = null;
+	// Outside method used for deleting left over files
+	public static void DeleteFile(String name) {
 		try {
-			writer = new BufferedWriter(new OutputStreamWriter(activity.openFileOutput(path, Context.MODE_PRIVATE)));
-			
+			File f = new File(name);
+			f.delete();
+		}catch(Exception e){}
+	}
+	
+	/**
+	 * Description: This method writs the information about the video file in JSON format into a
+	 * 				txt file, then it returns the path to the file.
+	 * @return txtPath (The path of the written text file)
+	 */
+	public String writeTimes() {		
+		File outfile = new File(activity.getFilesDir() + "TRIALJSON.txt");
+		if (outfile.exists()) {
+			outfile.delete();
+		}
+		
+		try {
+			outfile.createNewFile();
+			FileWriter writer = new FileWriter(outfile, true);
+			BufferedWriter out = new BufferedWriter(writer);			
 			String JSON = "";
-			JSON += "{";
+			JSON += "[";
 			for (int i = 0; i < trial_times.size(); i++) {
 				JSON += "{";
-				JSON += "Hour_of_Day:" + trial_times.get(i).getHourOfDay() + ",";
-				JSON += "Minute_of_Hour:" + trial_times.get(i).getMinuteOfHour() + ",";
-				JSON += "Second_of_Minute:" + trial_times.get(i).getSecondOfMinute();
+				JSON += "\"Hour_of_Day\":" + trial_times.get(i).getHourOfDay() + ",";
+				JSON += "\"Minute_of_Hour\":" + trial_times.get(i).getMinuteOfHour() + ",";
+				JSON += "\"Second_of_Minute\":" + trial_times.get(i).getSecondOfMinute();
 				JSON += "},";
 			}
 			
 			// Remove the last comma
-			JSON = JSON.substring(0, JSON.length() - 2);
-			JSON += "}";
+			JSON = JSON.substring(0, JSON.length() - 1);
+			JSON += "]";
 			
+			Log.v("FILE", JSON);
 			// Write the JSON to the file
-			writer.write(JSON);
-			writer.close();
+			out.write(JSON);
+			out.flush();
+			out.close();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}   
-	}
+		}
+		
+		return outfile.getAbsolutePath();
+	}	
 }

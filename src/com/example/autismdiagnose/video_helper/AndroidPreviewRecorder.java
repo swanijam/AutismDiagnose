@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.example.autismdiagnose.android_helpers.FileProcessor;
-
 import android.app.Activity;
 import android.graphics.Color;
 import android.hardware.Camera;
@@ -89,11 +87,6 @@ OnInfoListener, OnErrorListener {
 		if (outputFile.exists())
 			outputFile.delete();
 		
-		// Save the file name
-		String videoList = "videosList.txt";
-		FileProcessor.write_append(activity, outputPath,
-								   videoList);
-		FileProcessor.read(activity, videoList);
 		try {
 			// If a preview is going on, stop it and unlock the camera
 			camera.stopPreview();

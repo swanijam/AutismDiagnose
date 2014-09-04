@@ -2,6 +2,9 @@ package com.example.autismdiagnose.app;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -33,10 +36,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
 import com.example.autismdiagnose.R;
-import com.example.autismdiagnose.android_helpers.FileProcessor;
 import com.example.autismdiagnose.android_helpers.SpinningCircle;
 import com.example.autismdiagnose.android_helpers.Util;
 import com.example.autismdiagnose.video_helper.AndroidPreviewRecorder;
@@ -124,10 +127,6 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		// Help text for start trial button
 		StartTrialMessage = (TextView) findViewById(R.id.startTrialMessage);
 		StartTrialMessage.setVisibility(View.VISIBLE);
-		
-		// Message displayed when "Start Trial" button is disabled
-		TextView disableMessage = (TextView) findViewById(R.id.disableMessage);
-		
 		TextView restart = (TextView) findViewById(R.id.restartMessage);
 		
 		Help = (Button) findViewById(R.id.help);
@@ -152,7 +151,6 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		
 		TimerController.setTextView("notify", Notify);
 		TimerController.setTextView("startTrialMessage", StartTrialMessage);
-		TimerController.setTextView("disableMessage", disableMessage);
 		TimerController.setTextView("restart", restart);
 		
 		AlertDialog response = setResponseDialogListener();
@@ -182,7 +180,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		FinishedTrial = false;
 		
 		// Start a new recording session
-		String outputFile = getFilesDir() + "/trials0.mp4";
+		String outputFile = getFilesDir() + "/TRIAL-VIDEO.mp4";
 		videoData = new Response(outputFile, this);
 		// Add the start time
 		videoData.addTime();
@@ -253,7 +251,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 			stop();
 			PreviewRecorder.releaseRecorder();
 			PreviewRecorder.releaseCamera();
-			FileProcessor.DeleteFile(getFilesDir() + "/trials0.mp4");
+			Response.DeleteFile(getFilesDir() + "/TRIAL-VIDEO.mp4");
 			Log.v("Doin all de stuff", "soon");
 		}
 		else {
@@ -310,7 +308,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		// TODO Auto-generated method stub
 		if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
 			stop();
-			FileProcessor.DeleteFile(getFilesDir() + "/trials0.mp4");
+			Response.DeleteFile(getFilesDir() + "/TRIAL-VIDEO.mp4");
 			videoData = new Response(null, null);
 			videoData.setNoResponse(true);
 			PreviewRecorder.addVideoData(videoData);
@@ -337,7 +335,6 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 					TimerController.stopTimer();
 					TrialNumber += 1;
 					PreviewRecorder.addVideoData(videoData);
-					TimerController.showDelayAfterFinishTimer();
 					FinishedTrial = true;
 					Log.i(CLASSTAG, "Clicked Positive");
 				}
@@ -367,7 +364,6 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 					spinningcircle.setVisibility(View.GONE);
 					PreviewRecorder.addVideoData(videoData);
 					FinishedTrial = true;
-					TimerController.showDelayAfterFinishTimer();
 				}
 				
 				if (FinishedTrial) {
@@ -385,7 +381,9 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 					shp.edit().putInt("VIDEONUMBER", VideoNumber).commit();
 					
 					Start.setText("Uploading ...");
-					new UploadFile().execute(videoName + "_" + VideoNumber + ".mp4", videoData.getPath());
+					Start.setEnabled(false);
+					String path_txt = videoData.writeTimes();
+					new UploadFile().execute(videoName + "_" + VideoNumber, videoData.getPath(), path_txt);
 				}
 			}
 		};
@@ -474,39 +472,13 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 			 catch (Exception e) {
 				failedUpload();
 			 }
-			 
 	    	return params;
 	     }
-	     
-	     protected void onProgressUpdate(Integer... progress) {
-	    	 Log.v("SHITTT", progress[0] + "");
-	         Start.setText("Uploading " + progress[0] + "%");
-	     }
-
-
+	
 	     protected void onPostExecute(String [] result) {
-	 	 	try {
-				String fileName = result[0];
-				String filePath = result[1];
-			
-				File file = new File(filePath);
-				file.createNewFile();
-				Upload mUpload = tm.upload(
-						Constants.BUCKET_NAME,
-						fileName,
-						file);
-				
-				while (mUpload.isDone() == false && isNetworkAvailable()) {
-					progress.setProgress((int) mUpload.getProgress().getPercentTransferred());
-					//Log.d("Uploading", String.valueOf(mUpload.getProgress().getPercentTransferred()) + "%");
-				}
-				
-				Start.setText("Start Trial");
-				Start.setEnabled(true);
-			}
-			catch (Exception e) {
-				failedUpload();	
-			}
+	    	// Make the progress bar visible
+		     progress.setVisibility(View.VISIBLE);
+	    	 new CompleteUpload().execute(result);
 	     }
 	     
 	     protected void failedUpload() {
@@ -516,7 +488,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 			 Start.setText("Start Trial");
 			 Start.setEnabled(true);
 	     }
-	 }
+	}
 	
 	private class CompleteUpload extends AsyncTask<String, Integer, String[]> {
 
@@ -525,32 +497,43 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 			try {
 				String fileName = result[0];
 				String filePath = result[1];
+				String file_txt = result[2];
 			
 				File file = new File(filePath);
+				File txt_file = new File(file_txt);
 				file.createNewFile();
-				Upload mUpload = tm.upload(
-						Constants.BUCKET_NAME,
-						fileName,
-						file);
+				txt_file.createNewFile();
+				
+				ArrayList <File> twoFiles = new ArrayList<File>();
+				twoFiles.add(file);
+				twoFiles.add(txt_file);
+				
+				MultipleFileUpload mUpload = tm.uploadFileList(
+												   Constants.BUCKET_NAME, 
+												   fileName, 
+												   VideoUI.this.getFilesDir(), 
+												   twoFiles);
 				
 				while (mUpload.isDone() == false && isNetworkAvailable()) {
 					progress.setProgress((int) mUpload.getProgress().getPercentTransferred());
-					//Log.d("Uploading", String.valueOf(mUpload.getProgress().getPercentTransferred()) + "%");
-				}
-				
-				Start.setText("Start Trial");
-				Start.setEnabled(true);
+					Log.d("Uploading", String.valueOf(mUpload.getProgress().getPercentTransferred()) + "%");
+				}				
 			}
 			catch (Exception e) {
 				failedUpload();	
 			}
 			return result;
 	    }
-		
-		protected void onProgressUpdate(Integer... progress) {
-	    	 Log.v("SHITTT", progress[0] + "");
-	         Start.setText("Uploading " + progress[0] + "%");
-	    }
+	
+		protected void onPostExecute(String [] some) {
+			Start.setText("Start Trial");
+			Start.setEnabled(true);
+			progress.setVisibility(View.GONE);
+			StartTrialMessage.setVisibility(View.VISIBLE);
+			
+			// Display a final indication that upload completed.
+			Toast.makeText(VideoUI.this, "Uploaded Video!", Toast.LENGTH_SHORT).show();
+		}
 		
 		protected void failedUpload() {
 			 Builder failed = new Builder(VideoUI.this);

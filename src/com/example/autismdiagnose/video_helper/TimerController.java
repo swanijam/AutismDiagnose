@@ -138,31 +138,6 @@ public class TimerController {
 		}.start();
 		
 	}
-
-	/**
-	 * Method to disable the 'Start Trial' Button for 10 seconds after
-	 * has successfully completed the trial.
-	 * NOTE: textView "disableMessage" must be set to use this method.
-	 */
-	public void showDelayAfterFinishTimer() {
-		start.setEnabled(false);
-		TEXTVIEWS.get("disableMessage").setVisibility(View.VISIBLE);
-		Animation SlideIn = AnimationUtils.loadAnimation(Context, R.anim.slide_left);
-		TEXTVIEWS.get("disableMessage").startAnimation(SlideIn);
-		
-		if (CurrentTimer != null) {
-			CurrentTimer.cancel();
-		}
-		
-		CurrentTimer = new CountDownTimer(3000, 1000) {
-			@Override
-			public void onTick(long mills) {
-			}
-			@Override
-			public void onFinish() {
-			}
-		}.start();
-	}// end showDelay
 	
 	public void dismissDelayAfterFinish() {
 		start.setEnabled(true);
