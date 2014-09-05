@@ -102,13 +102,9 @@ OnInfoListener, OnErrorListener {
 			recorder.setVideoSource(VIDEOSOURCE);
 			
 			// Set the video quality
-				CamcorderProfile profile = CamcorderProfile.get(QUALITY);
-				profile.fileFormat = MediaRecorder.OutputFormat.MPEG_4;
-
+			CamcorderProfile profile = CamcorderProfile.get(QUALITY);
 			recorder.setProfile(profile);
 			recorder.setOutputFile(outputPath);
-			
-			recorder.setOrientationHint(90); // 90 degrees
 			prepareRecorder(holder);
 		}
 		catch(Exception e) {

@@ -156,7 +156,7 @@ public class TimerController {
 		Animation FadeIn = AnimationUtils.loadAnimation(Context, R.anim.fade_in);
 		TEXTVIEWS.get("restart").startAnimation(FadeIn);
 		start.setEnabled(false);
-		CurrentTimer = new CountDownTimer(3000, 1000) {
+		CurrentTimer = new CountDownTimer(5000, 1000) {
 			@Override
 			public void onTick(long mills) {
 			}

@@ -24,18 +24,18 @@
 		    android:layout_width="match_parent"
 		    android:layout_height="75dp"
 		    android:textSize="20dp"
-		    android:textColor="#FFFFFF"
+		    android:textColor="#000000"
 		    android:background="@drawable/rounded_edges"
 		    android:layout_gravity="center|center_vertical"
 		    android:gravity="center|center_vertical"
-		    android:text="Press 'Start Trial' to start recording" />
+		    android:text="Press 'Start Trial' to begin the trial!" />
 			
 		<TextView
             android:id="@+id/notify"
             android:layout_width="match_parent"
             android:layout_height="75dp"
             android:textSize="20dp"
-            android:textColor="#FFFFFF"
+            android:textColor="#000000"
             android:background="@drawable/rounded_edges"
             android:visibility="gone"
             android:layout_gravity="center|center_vertical"
@@ -47,7 +47,7 @@
 		    android:layout_width="match_parent"
 		    android:layout_height="70dp"
 		    android:textSize="20dp"
-		    android:textColor="#FFFFFF"
+		    android:textColor="#000000"
 		    android:background="@drawable/rounded_edges"
 		    android:visibility="gone"
 		    android:layout_gravity="center|center_vertical"
@@ -60,18 +60,6 @@
 		    android:layout_height="60dp"
 		    android:layout_width="60dp"
 		    android:visibility="gone"
-		    />
-		
-		<TextView 
-		    android:id="@+id/wait"
-		    android:layout_width="wrap_content"
-		    android:layout_height="wrap_content"
-		    android:layout_marginBottom="30dp"
-		    android:textSize="20dp"
-		    android:textColor="#FFFFFF"
-		    android:visibility="invisible"
-		    android:layout_gravity="bottom|center"
-		    android:text="wait ..."
 		    />
 		
 		<Button

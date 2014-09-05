@@ -15,14 +15,14 @@
    
  	<Button 
         android:id="@+id/done"
-        android:layout_width="100dp"
-        android:layout_height="80dp"
+        android:layout_width="150dp"
+        android:layout_height="100dp"
         android:layout_gravity="center|right"
         android:gravity="center"
         android:background="@drawable/btn_default_green"
         android:text="Get Started!"
         android:visibility="gone"
-        android:textSize="15dp"
+        android:textSize="25dp"
         android:textColor="#FFFFFF"/>
  
 </FrameLayout>

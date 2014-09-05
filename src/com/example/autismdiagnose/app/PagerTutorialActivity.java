@@ -30,9 +30,9 @@ public class PagerTutorialActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.viewpager_main);
         
-        images = new int[] { R.drawable.tutorial_title, R.drawable.tutorial_begin, 
-        		  R.drawable.tutorial_click_start, R.drawable.tutorial_say_name,R.drawable.tutorial_responded_no,
-                  R.drawable.tutorial_say_name, R.drawable.tutorial_responded_yes, R.drawable.discard,
+        images = new int[] { R.drawable.tutorial_title_swipe, R.drawable.tutorial_begin, 
+        		  R.drawable.tutorial_start_trial, R.drawable.tutorial_say_name,R.drawable.tutorial_no,
+                  R.drawable.tutorial_say_name_again, R.drawable.tutorial_yes, R.drawable.tutorial_discard,
                   R.drawable.tutorial_done};
        
         // Locate the ViewPager in viewpager_main.xml

@@ -189,7 +189,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 							   outputFile, 
 							   MediaRecorder.AudioSource.DEFAULT, 
 							   MediaRecorder.VideoSource.CAMERA, 
-							   CamcorderProfile.QUALITY_480P);
+							   CamcorderProfile.QUALITY_LOW);
 		
 		TimerController.startCountDownResponseTimer(TrialNumber);
 		spinningcircle.setVisibility(View.VISIBLE);
