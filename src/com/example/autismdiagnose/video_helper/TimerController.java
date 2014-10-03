@@ -108,7 +108,6 @@ public class TimerController {
 			@Override
 			public void onFinish() {
 				AnimatePrompt.dismissNotify(TEXTVIEWS.get("notify"), false);
-				Log.v("I Got", "Now I'm GOING AWAY SHIT");
 				startResponseTimer();
 			}
 		}.start();
@@ -118,9 +117,13 @@ public class TimerController {
 	
 	public void startResponseTimer() {
 		CurrentTimer.cancel();
-		CurrentTimer = new CountDownTimer(RecordingLimit, 1) {
+		CurrentTimer = new CountDownTimer(RecordingLimit, 10) {
 			@Override
 			public void onTick(long mills) {
+				// Calculate what percentage of time is left and then draw the spinning
+				// circle accordingly.
+				double percent = (double)(RecordingLimit - mills) / (double) RecordingLimit;
+				SpinningCircle.percent = percent;
 				SpinningCircle.invalidate();
 			}
 			@Override
@@ -135,7 +138,18 @@ public class TimerController {
 				}
 				catch(Exception e) {}
 			}
-		}.start();
+		};
+		
+		CountDownTimer secondDelay = new CountDownTimer(1500, 1000) {
+			@Override
+			public void onTick(long millisUntilFinished) {}
+			@Override
+			public void onFinish() {
+				CurrentTimer.start();
+			}
+		};
+		
+		secondDelay.start();
 		
 	}
 	
@@ -165,7 +179,6 @@ public class TimerController {
 				Animation FadeOut = AnimationUtils.loadAnimation(Context, R.anim.fade_out);
 				TEXTVIEWS.get("restart").startAnimation(FadeOut);
 				TEXTVIEWS.get("restart").setVisibility(View.GONE);
-				TEXTVIEWS.get("startTrialMessage").setVisibility(View.VISIBLE);
 				start.setEnabled(true);
 			}
 		}.start();
@@ -178,7 +191,6 @@ public class TimerController {
 	}
 	
 	public void hideAllTextView() {
-		TEXTVIEWS.get("startTrialMessage").setVisibility(View.GONE);
 		for (String view: TEXTVIEWS.keySet()) {
 			TEXTVIEWS.get(view).setVisibility(View.GONE);
 			Log.v("view", view);

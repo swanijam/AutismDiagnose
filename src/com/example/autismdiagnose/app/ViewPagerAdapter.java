@@ -1,6 +1,9 @@
 package com.example.autismdiagnose.app;
  
 import com.example.autismdiagnose.R;
+import com.example.autismdiagnose.video_helper.Response;
+import com.fasterxml.jackson.databind.deser.impl.InnerClassProperty;
+import com.viewpagerindicator.CirclePageIndicator;
 
 import android.app.Activity;
 import android.content.Context;
@@ -17,6 +20,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
  
 public class ViewPagerAdapter extends PagerAdapter {
     LayoutInflater inflater;
@@ -24,12 +28,13 @@ public class ViewPagerAdapter extends PagerAdapter {
     Activity activity;
     int images[];
     SharedPreferences Prefs;
+    CirclePageIndicator indicator;
  
-    public ViewPagerAdapter(Context context, Activity activity, int[] images) {
+    public ViewPagerAdapter(Context context, Activity activity, CirclePageIndicator ind, int[] images) {
     	this.context = context;
     	this.images = images;
     	this.activity = activity;
-        Log.v("HEllO", "In contstructor");
+    	indicator = ind;
     }
  
     @Override
@@ -41,7 +46,7 @@ public class ViewPagerAdapter extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, int position) {    	
         // Declare Variables
         ImageView imgflag;
- 
+        
         inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View itemView = inflater.inflate(R.layout.viewpager_item, container,
@@ -62,7 +67,49 @@ public class ViewPagerAdapter extends PagerAdapter {
 				}
 			});
         }
- 
+        
+        Button goToTrial = (Button) itemView.findViewById(R.id.goToTrial);
+        ImageView swipe = (ImageView) itemView.findViewById(R.id.swipePic);
+        ImageView titlePic = (ImageView) itemView.findViewById(R.id.titlePic);
+        ImageView smallTitle = (ImageView) itemView.findViewById(R.id.smalll_title);
+        ImageView bottom = (ImageView) itemView.findViewById(R.id.bottom);
+        TextView dateDisplay = (TextView) itemView.findViewById(R.id.lastTrial);
+        TextView swipeText = (TextView) itemView.findViewById(R.id.text);
+        
+        if (position > 0) {
+        	goToTrial.setVisibility(View.GONE);
+        	titlePic.setVisibility(View.GONE);
+        	smallTitle.setVisibility(View.GONE);
+        	swipe.setVisibility(View.GONE);
+        	swipeText.setVisibility(View.GONE);
+        	bottom.setVisibility(View.GONE);
+    		dateDisplay.setVisibility(View.GONE);
+        }
+        else {
+        	goToTrial.setVisibility(View.VISIBLE);
+        	titlePic.setVisibility(View.VISIBLE);
+        	smallTitle.setVisibility(View.GONE);
+        	swipe.setVisibility(View.VISIBLE);
+        	swipeText.setVisibility(View.VISIBLE);
+        	bottom.setVisibility(View.VISIBLE);
+        	goToTrial.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					switchToVideoAndDestroy();
+				}
+			});
+        	String lastDate = Response.getDateofLastTrial(activity);
+        	if(lastDate.length() > 0) {
+        		titlePic.setVisibility(View.GONE);
+        		smallTitle.setVisibility(View.VISIBLE);
+        		dateDisplay.setVisibility(View.VISIBLE);
+        		dateDisplay.setText("Last Trial\n"+lastDate);
+        	}
+        }
+     
+        if (position > 1) {
+        	indicator.setVisibility(View.VISIBLE);
+    	}
         // Add viewpager_item.xml to ViewPager
         ((ViewPager) container).addView(itemView);
  

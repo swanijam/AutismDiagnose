@@ -1,17 +1,18 @@
 package com.example.autismdiagnose.app;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
+import org.joda.time.DateTime;
+
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
-import android.provider.Settings.Secure;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Camera;
@@ -21,24 +22,23 @@ import android.media.MediaRecorder.OnErrorListener;
 import android.media.MediaRecorder.OnInfoListener;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.Window;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.Upload;
 import com.example.autismdiagnose.R;
 import com.example.autismdiagnose.android_helpers.SpinningCircle;
 import com.example.autismdiagnose.android_helpers.Util;
@@ -60,11 +60,10 @@ import com.example.autismdiagnose.video_helper.TimerController;
  */
 
 public class VideoUI extends Activity implements
-SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
+SurfaceHolder.Callback, android.view.View.OnClickListener, OnInfoListener, OnErrorListener {
 		
 		// "Please Say Your Child's Name" message
 	TextView Notify;
-	TextView StartTrialMessage;
 	
 	private Button Help;
 	private Button Start;
@@ -105,6 +104,12 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 
 	private static final String CLASSTAG = "VideoUI";
 	private String PhoneNumber;
+	private boolean Wifi;
+	private int VideoQuality;
+	private boolean isUploading;
+	private boolean isRecording=false;
+	private String EnteredResponse = null;
+	
 	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -124,9 +129,6 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		// "Please Say Your Child's Name" message
 		Notify = (TextView) findViewById(R.id.notify);
 		
-		// Help text for start trial button
-		StartTrialMessage = (TextView) findViewById(R.id.startTrialMessage);
-		StartTrialMessage.setVisibility(View.VISIBLE);
 		TextView restart = (TextView) findViewById(R.id.restartMessage);
 		
 		Help = (Button) findViewById(R.id.help);
@@ -150,7 +152,6 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 						   RECORDINGLIMIT, Start);
 		
 		TimerController.setTextView("notify", Notify);
-		TimerController.setTextView("startTrialMessage", StartTrialMessage);
 		TimerController.setTextView("restart", restart);
 		
 		AlertDialog response = setResponseDialogListener();
@@ -183,16 +184,17 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		String outputFile = getFilesDir() + "/TRIAL-VIDEO.mp4";
 		videoData = new Response(outputFile, this);
 		// Add the start time
-		videoData.addTime();
+		videoData.addTime("NONE");
 		
 		PreviewRecorder.record(this, Holder, 
 							   outputFile, 
 							   MediaRecorder.AudioSource.DEFAULT, 
 							   MediaRecorder.VideoSource.CAMERA, 
-							   CamcorderProfile.QUALITY_LOW);
+							   VideoQuality);
 		
 		TimerController.startCountDownResponseTimer(TrialNumber);
 		spinningcircle.setVisibility(View.VISIBLE);
+		isRecording = true;
 	}
 	
 	// Method for Killing the application completely. Done if the Internet connection is not on.
@@ -218,11 +220,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	public void stop() {
 		PreviewRecorder.stopRecorder();
 		TimerController.stopTimer();
-		
-		Start.setVisibility(View.VISIBLE);
-		Help.setVisibility(View.VISIBLE);
 		spinningcircle.setVisibility(View.GONE);
-		
 		// Reset the arcwidth
 		spinningcircle.arcwidth = 360;
 	}
@@ -252,12 +250,18 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 			PreviewRecorder.releaseRecorder();
 			PreviewRecorder.releaseCamera();
 			Response.DeleteFile(getFilesDir() + "/TRIAL-VIDEO.mp4");
-			Log.v("Doin all de stuff", "soon");
 		}
 		else {
 			PreviewRecorder.releaseRecorder();
 			PreviewRecorder.releaseCamera();
-		}	
+		}
+		
+		if (isRecording) {
+			Start.setVisibility(View.VISIBLE);
+			Help.setVisibility(View.VISIBLE);
+			findViewById(R.id.restartMessage).setVisibility(View.VISIBLE);
+			isRecording = false;
+		}
 	}
 	
 	@Override
@@ -265,18 +269,6 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		super.onPause();
 		Log.v(CLASSTAG, "APP PAUSED");
 		Pause();
-	}
-	
-	@Override
-	public void onStop() {
-		super.onStop();
-		Log.v(CLASSTAG, "APP STOPPED");
-		
-		// Kill the app if user presses the power button and turns off the screen.
-		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-		if (!pm.isScreenOn()) {
-			//killApp();
-		}
 	}
 	
 	@Override
@@ -293,8 +285,6 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		catch(Exception e) {
 			showErrorDialog();
 		}
-		
-		findViewById(R.id.startTrialMessage).setVisibility(View.VISIBLE);
 	}
 	
 	@Override
@@ -336,6 +326,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 					TrialNumber += 1;
 					PreviewRecorder.addVideoData(videoData);
 					FinishedTrial = true;
+					EnteredResponse = "YES";
 					Log.i(CLASSTAG, "Clicked Positive");
 				}
 				else if (which == Dialog.BUTTON_NEGATIVE) {
@@ -348,27 +339,32 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 				}
 				else if(which == Dialog.BUTTON_NEUTRAL) {
 					stop();
+					Help.setVisibility(View.VISIBLE);
+					Start.setVisibility(View.VISIBLE);
+					
 					TimerController.stopTimer();
 					TimerController.showRestartMessage();
+					EnteredResponse = "NO";
 					Log.i(CLASSTAG, "Clicked Neutral");
 				}
 				
-				if (TrialNumber == 1) {
-					videoData.addTime();
+				if (TrialNumber < 3) {
+					videoData.addTime(EnteredResponse);
 				}
-				else if (TrialNumber == 2) {
-					videoData.addTime();
-				}
-				else if (TrialNumber == 3) {
-					videoData.addTime();
-					spinningcircle.setVisibility(View.GONE);
-					PreviewRecorder.addVideoData(videoData);
+				else {
 					FinishedTrial = true;
 				}
 				
 				if (FinishedTrial) {
-					stop();
+					videoData.addTime(EnteredResponse);
+					spinningcircle.setVisibility(View.GONE);
+					PreviewRecorder.addVideoData(videoData);
+					EnteredResponse = null;
 					
+					isRecording = false;
+					stop();
+							
+					videoData.storeDateOfTrial();
 					SharedPreferences shp = getSharedPreferences("com.example.autismdiagnose", 
 																 Context.MODE_PRIVATE);
 					
@@ -380,19 +376,19 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 					VideoNumber ++;
 					shp.edit().putInt("VIDEONUMBER", VideoNumber).commit();
 					
-					Start.setText("Uploading ...");
-					Start.setEnabled(false);
 					String path_txt = videoData.writeTimes();
+					findViewById(R.id.UploadMessage).setVisibility(View.VISIBLE);
+					
 					new UploadFile().execute(videoName + "_" + VideoNumber, videoData.getPath(), path_txt);
 				}
 			}
 		};
 		
 		// Show the dialog and determine if there was a response
-		ResponseBuilder.setMessage("Was there a response? \n\t(answer within 5 seconds)")
-		.setPositiveButton("Yes", responseListener);
-		ResponseBuilder.setNegativeButton("No", responseListener);
-		ResponseBuilder.setNeutralButton("Discard", responseListener);
+		ResponseBuilder.setMessage("Was there a response?")
+			.setPositiveButton("Yes", responseListener)
+			.setNegativeButton("No", responseListener)
+			.setNeutralButton("Cancel", responseListener);
 	
 		return ResponseBuilder.create();
 	}
@@ -419,6 +415,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	    return activeNetworkInfo != null && activeNetworkInfo.isConnected();
 	}
 	
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private void networkCheck() {
 		// The user must have the internet on. If not, quit the application
 		if (!isNetworkAvailable()) {
@@ -435,6 +432,40 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 			});
 			
 			error.show();
+		}
+		else {
+			ConnectivityManager connectivityManager 
+	          = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+			NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+			
+			if (activeNetworkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+				Wifi = true;
+				getApplicationContext();
+				// Uploading with wifi. Change video quality depending on speed.
+				// Set the video quality depending on the speed of wifi/service
+				WifiManager wifiManger = (WifiManager) 
+						getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+				WifiInfo wifiInfo = wifiManger.getConnectionInfo();
+				
+				final int FAST_WIFI_SPEED = 54; //Mbps
+				
+				if (wifiInfo.getLinkSpeed() < FAST_WIFI_SPEED) {
+					VideoQuality = CamcorderProfile.QUALITY_LOW;
+					Log.v("VIDEOQUALITY_LOW", "" + wifiInfo.getLinkSpeed());
+					//spinningcircle.Subtract = 2.10;
+				} 
+				else {
+					VideoQuality = CamcorderProfile.QUALITY_720P;
+					Log.v("VIDEOQUALITY_HIGH", "" + wifiInfo.getLinkSpeed());
+					//spinningcircle.Subtract = 2.15;
+				}
+			}
+			else {
+				// Uploading video with 4G/3G data. We do not want to record in high quality.
+				Wifi = false;
+				VideoQuality = CamcorderProfile.QUALITY_LOW;
+				//spinningcircle.Subtract = 2.10;
+			}
 		}
 	}
 	
@@ -480,14 +511,6 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 		     progress.setVisibility(View.VISIBLE);
 	    	 new CompleteUpload().execute(result);
 	     }
-	     
-	     protected void failedUpload() {
-			 Builder failed = new Builder(VideoUI.this);
-			 failed.setMessage("Upload Failed! Please check your Internet connection and retry the trial!");
-			 failed.setPositiveButton("Ok", null);
-			 Start.setText("Start Trial");
-			 Start.setEnabled(true);
-	     }
 	}
 	
 	private class CompleteUpload extends AsyncTask<String, Integer, String[]> {
@@ -514,6 +537,7 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 												   VideoUI.this.getFilesDir(), 
 												   twoFiles);
 				
+				isUploading = true;
 				while (mUpload.isDone() == false && isNetworkAvailable()) {
 					progress.setProgress((int) mUpload.getProgress().getPercentTransferred());
 					Log.d("Uploading", String.valueOf(mUpload.getProgress().getPercentTransferred()) + "%");
@@ -526,21 +550,32 @@ SurfaceHolder.Callback, OnClickListener, OnInfoListener, OnErrorListener {
 	    }
 	
 		protected void onPostExecute(String [] some) {
-			Start.setText("Start Trial");
-			Start.setEnabled(true);
+			isUploading = false;
+			findViewById(R.id.UploadMessage).setVisibility(View.GONE);
+			Start.setVisibility(View.VISIBLE);
+			Help.setVisibility(View.VISIBLE);
 			progress.setVisibility(View.GONE);
-			StartTrialMessage.setVisibility(View.VISIBLE);
 			
-			// Display a final indication that upload completed.
-			Toast.makeText(VideoUI.this, "Uploaded Video!", Toast.LENGTH_SHORT).show();
+			Builder done = new Builder(VideoUI.this);
+			done.setMessage("This Trial is done.\nVideo upload was successful.");
+			done.setPositiveButton("Ok!", new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					DemoActivity.switchToPagerTutorial(VideoUI.this);					
+
+				}
+			});
+			done.setCancelable(false);
+			done.show();
 		}
-		
-		protected void failedUpload() {
-			 Builder failed = new Builder(VideoUI.this);
-			 failed.setMessage("Upload Failed! Please check your Internet connection and retry the trial!");
-			 failed.setPositiveButton("Ok", null);
-			 Start.setText("Start Trial");
-			 Start.setEnabled(true);
-	     }
-		}
+	}
+	
+	protected void failedUpload() {
+		 Builder failed = new Builder(VideoUI.this);
+		 failed.setMessage("Upload Failed! Please check your Internet connection and retry the trial!");
+		 failed.setPositiveButton("Ok", null);
+		 Start.setVisibility(View.VISIBLE);
+		 progress.setVisibility(View.GONE);
+    }
 }

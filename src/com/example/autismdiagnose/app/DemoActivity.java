@@ -45,7 +45,7 @@ public class DemoActivity extends Activity {
 		boolean completedTutorial = Prefs.getBoolean("COMPLETED", false);
 		
 		if (completedTutorial && bundle == null) {
-			switchToVideoAndDestroy();
+			switchToPagerTutorial(DemoActivity.this);
 		}
 		// If the user is using the app for the first time
 		else {
@@ -58,7 +58,7 @@ public class DemoActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					Prefs.edit().putString("EMAIL_ADDRESS", emailAddress.getText().toString()).commit();
-					switchToPagerTutorial();
+					switchToPagerTutorial(DemoActivity.this);
 				}
 			});
 			
@@ -95,10 +95,10 @@ public class DemoActivity extends Activity {
 	    }
 	} 
 	
-	public void switchToPagerTutorial() {
-		Intent pagerTutorial = new Intent(this, PagerTutorialActivity.class);
-		startActivity(pagerTutorial);
-		finish();
+	public static void switchToPagerTutorial(Activity activity) {
+		Intent pagerTutorial = new Intent(activity, PagerTutorialActivity.class);
+		activity.startActivity(pagerTutorial);
+		activity.finish();
 	}
 
 	public void switchToVideoAndDestroy() {

@@ -12,6 +12,7 @@ import org.joda.time.DateTimeZone;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 public class Response {
@@ -19,11 +20,15 @@ public class Response {
 	private String path;
 	private boolean NO_RESPONSE = false;
 	private ArrayList<DateTime> trial_times;
+	private ArrayList<String> responses;
 	private Activity activity;
+	private String [] months = {"Jan.", "Feb.", "Mar.", "Apr.", "May", "June",
+			"July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."};
 	
 	public Response(String path, Activity activity) {
 		this.path = path;
 		trial_times = new ArrayList<DateTime>();
+		responses = new ArrayList<String>();
 		this.activity = activity;
 	}
 
@@ -31,8 +36,9 @@ public class Response {
 		return path;
 	}
 	
-	public void addTime() {
+	public void addTime(String response) {
 		trial_times.add(getCurrentTime());
+		responses.add(response);
 	}
 	
 	public void getTime(int index) {
@@ -47,6 +53,27 @@ public class Response {
 		DateTime datetime = new DateTime();
 		return datetime;
 	}
+	
+	// Methods dealing with storing the last video date
+	public String getDateAsString () {
+		DateTime dateObj = getCurrentTime();
+		return months[dateObj.getMonthOfYear() - 1] + " " + dateObj.getDayOfMonth();
+	}
+	
+	public static String getDateofLastTrial(Activity activity) {
+		SharedPreferences shp = activity.getSharedPreferences("com.example.autismdiagnose", 
+				 Context.MODE_PRIVATE);
+		
+		return shp.getString("LASTDATE", "");
+	}
+	
+	public void storeDateOfTrial() {
+		SharedPreferences shp = activity.getSharedPreferences("com.example.autismdiagnose", 
+				 Context.MODE_PRIVATE);
+		shp.edit().putString("LASTDATE", getDateAsString()).commit();
+	}
+	//
+	
 	
 	// Outside method used for deleting left over files
 	public static void DeleteFile(String name) {
@@ -77,7 +104,8 @@ public class Response {
 				JSON += "{";
 				JSON += "\"Hour_of_Day\":" + trial_times.get(i).getHourOfDay() + ",";
 				JSON += "\"Minute_of_Hour\":" + trial_times.get(i).getMinuteOfHour() + ",";
-				JSON += "\"Second_of_Minute\":" + trial_times.get(i).getSecondOfMinute();
+				JSON += "\"Second_of_Minute\":" + trial_times.get(i).getSecondOfMinute() + ",";
+				JSON += "\"Response\":" + responses.get(i);
 				JSON += "},";
 			}
 			

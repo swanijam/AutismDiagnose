@@ -19,6 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center"
             android:padding="10dip"
+            android:visibility="gone"
             app:radius="5dp"
             app:fillColor="#33CCFF"
             app:pageColor="#ffffff"

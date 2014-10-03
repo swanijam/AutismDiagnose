@@ -11,7 +11,8 @@ import android.view.View;
 
 public class SpinningCircle extends View {
 	
-	public static float arcwidth = 360;
+	public static double arcwidth = 360;
+	public static double percent = 0;
 	
 	public SpinningCircle(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -22,13 +23,13 @@ public class SpinningCircle extends View {
 		super.onDraw(canvas);
 		
 		Paint FillColor = new Paint();
-		FillColor.setColor(Color.parseColor("#00FF66"));		
+		FillColor.setColor(Color.parseColor("#33FFFF"));		
 		FillColor.setStyle(Paint.Style.STROKE);
 		FillColor.setStrokeWidth(8);
 	
-		canvas.drawArc(new RectF(10, 10, canvas.getWidth()-10, canvas.getHeight()-10), 270, -arcwidth, false, FillColor);
+		canvas.drawArc(new RectF(10, 10, canvas.getWidth()-10, canvas.getHeight()-10), 270, (float) -arcwidth, false, FillColor);
 		
-		
-		arcwidth -= 2.10;
+		// Calculate what percentage of the arcwidth to subtract
+		arcwidth = 360 - ((double) 360 * (double) percent); 
 	}
 }

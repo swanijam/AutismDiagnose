@@ -30,20 +30,22 @@ public class PagerTutorialActivity extends Activity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.viewpager_main);
         
-        images = new int[] { R.drawable.tutorial_title_swipe, R.drawable.tutorial_begin, 
-        		  R.drawable.tutorial_start_trial, R.drawable.tutorial_say_name,R.drawable.tutorial_no,
-                  R.drawable.tutorial_say_name_again, R.drawable.tutorial_yes, R.drawable.tutorial_discard,
+        images = new int[] { R.drawable.tutorial_blank_white,
+        		  R.drawable.tutorial_position, R.drawable.tutorial_start,
+        		  R.drawable.tutorial_name,R.drawable.tutorial_no,
+                  R.drawable.tutorial_name_again, R.drawable.tutorial_yes,
                   R.drawable.tutorial_done};
        
+        // ViewPager Indicator
+        mIndicator = (CirclePageIndicator) findViewById(R.id.indicator);
+        
         // Locate the ViewPager in viewpager_main.xml
         viewPager = (ViewPager) findViewById(R.id.pager);
         // Pass results to ViewPagerAdapter Class
-        adapter = new ViewPagerAdapter(getApplicationContext(), PagerTutorialActivity.this, images);
+        adapter = new ViewPagerAdapter(getApplicationContext(), PagerTutorialActivity.this, mIndicator, images);
         // Binds the Adapter to the ViewPager
         viewPager.setAdapter(adapter);
  
-        // ViewPager Indicator
-        mIndicator = (CirclePageIndicator) findViewById(R.id.indicator);
-        mIndicator.setViewPager(viewPager);       
+        mIndicator.setViewPager(viewPager);
     }
 }
