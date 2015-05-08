@@ -1,4 +1,6 @@
-# Created by http://www.gitignore.io
+#Created by http://www.gitignore.io
+
+.classpath
 
 ### Android ###
 # Built application files
