@@ -102,6 +102,9 @@ public class Response {
 			JSON += "[";
 			for (int i = 0; i < trial_times.size(); i++) {
 				JSON += "{";
+				JSON += "\"Year\":" + trial_times.get(i).getYear() + ",";
+				JSON += "\"Month_of_Year\":" + trial_times.get(i).getMonthOfYear() + ",";
+				JSON += "\"Day_of_Month\":" + trial_times.get(i).getDayOfMonth() + ",";
 				JSON += "\"Hour_of_Day\":" + trial_times.get(i).getHourOfDay() + ",";
 				JSON += "\"Minute_of_Hour\":" + trial_times.get(i).getMinuteOfHour() + ",";
 				JSON += "\"Second_of_Minute\":" + trial_times.get(i).getSecondOfMinute() + ",";

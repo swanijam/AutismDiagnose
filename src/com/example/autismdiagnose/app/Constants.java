@@ -2,8 +2,8 @@ package com.example.autismdiagnose.app;
 
 public class Constants {
 		// Replace values w/ right values
-		public static final String AWS_ACCOUNT_ID = "656866556344";
-		public static final String COGNITO_POOL_ID = "us-east-1:bd0ee011-fbe4-49c3-a6e3-36d4263ae6de";
-		public static final String COGNITO_ROLE_UNAUTH = "arn:aws:iam::656866556344:role/myownrole";
-		public static final String BUCKET_NAME = "AutismDiagnose/APP_DATA ";
+		public static final String AWS_ACCOUNT_ID = "779047852880";
+		public static final String COGNITO_POOL_ID = "us-east-1:2c39a345-8657-40fb-ac70-409e3cef475a";
+		public static final String COGNITO_ROLE_UNAUTH = "arn:aws:iam::779047852880:role/autismapprole";
+		public static final String BUCKET_NAME = "responsetoname/APP_DATA";
 }
