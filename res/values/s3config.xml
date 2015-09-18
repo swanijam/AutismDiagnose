@@ -4,5 +4,5 @@
 	<!-- never store your S3 credentials like this in a real app! -->
     <string name="s3_access_key">AKIAJDZ6WYRV24WOIIOA</string>
     <string name="s3_secret">3fuG2mdBS88Q2YlziY5XYdlTAaipztV6GyKEPz7A</string>
-    <string name="s3_bucket">AutismDiagnose</string>
+    <string name="s3_bucket">responsetoname</string>
 </resources>

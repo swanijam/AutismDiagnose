@@ -9,7 +9,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -19,7 +18,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -44,7 +42,6 @@ public class ViewPagerAdapter extends PagerAdapter {
         return view == ((FrameLayout) object);
     }
  
-    
     @Override
     public Object instantiateItem(ViewGroup container, int position) {    	
         // Declare Variables
@@ -59,7 +56,6 @@ public class ViewPagerAdapter extends PagerAdapter {
         // Capture position and set to the ImageView
         imgflag.setImageResource(images[position]);
         
-        
         if (position == images.length - 1) {	       
         	// Make the done button visible
         	Button done = (Button) itemView.findViewById(R.id.done);
@@ -72,33 +68,30 @@ public class ViewPagerAdapter extends PagerAdapter {
 			});
         }
         
-        ImageButton goToTrial = (ImageButton) itemView.findViewById(R.id.goToTrial);
+        Button goToTrial = (Button) itemView.findViewById(R.id.goToTrial);
         ImageView swipe = (ImageView) itemView.findViewById(R.id.swipePic);
+        ImageView titlePic = (ImageView) itemView.findViewById(R.id.titlePic);
         ImageView smallTitle = (ImageView) itemView.findViewById(R.id.smalll_title);
         ImageView bottom = (ImageView) itemView.findViewById(R.id.bottom);
-        ImageView banner = (ImageView) itemView.findViewById(R.id.banner);
         TextView dateDisplay = (TextView) itemView.findViewById(R.id.lastTrial);
         TextView swipeText = (TextView) itemView.findViewById(R.id.text);
         
         if (position > 0) {
         	goToTrial.setVisibility(View.GONE);
+        	titlePic.setVisibility(View.GONE);
         	smallTitle.setVisibility(View.GONE);
         	swipe.setVisibility(View.GONE);
         	swipeText.setVisibility(View.GONE);
         	bottom.setVisibility(View.GONE);
     		dateDisplay.setVisibility(View.GONE);
-    		banner.setVisibility(View.GONE);
-    		imgflag.setVisibility(View.VISIBLE);
         }
         else {
         	goToTrial.setVisibility(View.VISIBLE);
-        	smallTitle.setVisibility(View.VISIBLE);
+        	titlePic.setVisibility(View.VISIBLE);
+        	smallTitle.setVisibility(View.GONE);
         	swipe.setVisibility(View.VISIBLE);
         	swipeText.setVisibility(View.VISIBLE);
-        	bottom.setVisibility(View.GONE);
-        	banner.setVisibility(View.VISIBLE);
-        	imgflag.setVisibility(View.GONE);
-    		
+        	bottom.setVisibility(View.VISIBLE);
         	goToTrial.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -107,8 +100,9 @@ public class ViewPagerAdapter extends PagerAdapter {
 			});
         	String lastDate = Response.getDateofLastTrial(activity);
         	if(lastDate.length() > 0) {
+        		titlePic.setVisibility(View.GONE);
         		smallTitle.setVisibility(View.VISIBLE);
-        		dateDisplay.setVisibility(View.GONE);
+        		dateDisplay.setVisibility(View.VISIBLE);
         		dateDisplay.setText("Last Trial\n"+lastDate);
         	}
         }
@@ -129,7 +123,6 @@ public class ViewPagerAdapter extends PagerAdapter {
  
     }
 
-    
 	@Override
 	public int getCount() {
 		// Returns the number of views available
@@ -141,6 +134,7 @@ public class ViewPagerAdapter extends PagerAdapter {
     	Prefs = activity.getSharedPreferences(
 				  "com.example.autismdiagnose", 
 				  Context.MODE_PRIVATE);
+    	
 	    if (Prefs != null) {
 			Prefs.edit().putBoolean("COMPLETED", true).commit();
 		}

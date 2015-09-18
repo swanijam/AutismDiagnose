@@ -2,7 +2,6 @@ package com.example.autismdiagnose.app;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.joda.time.DateTime;
 
@@ -38,10 +37,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.VideoView;
 
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.example.autismdiagnose.R;
@@ -367,15 +362,15 @@ SurfaceHolder.Callback, android.view.View.OnClickListener, OnInfoListener, OnErr
 					EnteredResponse = null;
 					
 					isRecording = false;
-					stop();	
-					
+					stop();
+							
 					videoData.storeDateOfTrial();
 					SharedPreferences shp = getSharedPreferences("com.example.autismdiagnose", 
 																 Context.MODE_PRIVATE);
 					
 					// The unique identifier of the video
 					String videoName = shp.getString("EMAIL_ADDRESS", "anonymous@unknown.com");
-					// The number of videos the user records is stored in this variable in
+					// The number of videos the usler records is stored in this variable in
 					// SharedPrefrences.
 					VideoNumber = shp.getInt("VIDEONUMBER", 0);
 					VideoNumber ++;
